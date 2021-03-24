@@ -1,0 +1,138 @@
+﻿<Window x:Class="CG_Project_1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CG_Project_1"
+        mc:Ignorable="d"
+        Title="Image Filtering" Height="600" Width="1100">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="#ccffb3" />
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="Height" Value="20"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="160"/>
+            <ColumnDefinition Width="300"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" HorizontalContentAlignment="Center" FontSize="16">Original</Label>
+        <Image Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Name="originalImage" Width="Auto" MaxHeight="500" DockPanel.Dock="Top"  Margin="15,10,10,10" />
+        <Label Grid.Row="0" Grid.Column="1" HorizontalContentAlignment="Center" FontSize="16">Result</Label>
+        <Image Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center" Name="filterImage" Width="Auto" MaxHeight="500" DockPanel.Dock="Top" Margin="10,10,15,10" />
+
+        <DockPanel Grid.Row="2" Grid.Column="0">
+            <Button DockPanel.Dock="Bottom"  Name="LoadImageButton" Click="Load_Image_Click">Load Image</Button>
+        </DockPanel>
+
+        <Grid Grid.Row="2" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Name="SaveImageButton"  Click="Save_Image_Click" HorizontalAlignment="Right" Margin="0,0,10,0">Save Image</Button>
+            <Button Grid.Column="1" Name="ClearImageButton" Click="Clear_Image_Click" HorizontalAlignment="Left" Margin="10,0,0,0">Clear Filters</Button>
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="3" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.ColumnSpan="2" Content="Functional Filters" FontSize="16" HorizontalAlignment="Center"/>
+            <Button Grid.Row="1" MinWidth="130" Height="30" Click="Inversion_Button_Click">Inversion</Button>
+            <Button Grid.Row="2" MinWidth="130" Height="30" Click="Brightness_Button_Click">Brightness correction</Button>
+            <Button Grid.Row="3" MinWidth="130" Height="30" Click="Contrast_Button_Click">Contrast enhancement</Button>
+            <Button Grid.Row="4" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Gamma_Button_Click">Gamma correction</Button>
+            <Button Grid.Row="5" MinWidth="130" Height="30" Click="Custom_Button_Click">Apply Custom filter</Button>
+            <Button Grid.Row="1" Grid.Column="1" Width="30" Height="30" Click="Inversion_Edit_Button_Click">-></Button>
+            <Button Grid.Row="2" Grid.Column="1" Width="30" Height="30" Click="Brightness_Edit_Button_Click">-></Button>
+            <Button Grid.Row="3" Grid.Column="1" Width="30" Height="30" Click="Contrast_Edit_Button_Click">-></Button>
+            <Button Grid.Row="5" Grid.Column="1" Width="30" Height="30" Click="Custom_Clear_Button_Click">-></Button>
+
+            <Label Grid.Row="6" Grid.ColumnSpan="2" Content="Convolution Filters" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Button Grid.Row="7" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Blur_Button_Click">Blur</Button>
+            <Button Grid.Row="8" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Gaussian_Blur_Button_Click">Gaussian blur</Button>
+            <Button Grid.Row="9" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Sharpen_Button_Click">Sharpening</Button>
+            <Button Grid.Row="10" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Edge_Detection_Button_Click">Edge detection</Button>
+            <Button Grid.Row="11" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Emboss_Button_Click">Emboss</Button>
+
+            <Label Grid.Row="12" Grid.ColumnSpan="2" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="Grid Filter" />
+            <Grid  Grid.Row="13" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+            
+                <TextBox Name="a1" Grid.Row="0" Grid.Column="0" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox" ></TextBox>
+                <TextBox Name="a2" Grid.Row="0" Grid.Column="1" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a3" Grid.Row="0" Grid.Column="2" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a4" Grid.Row="1" Grid.Column="0" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a5" Grid.Row="1" Grid.Column="1" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a6" Grid.Row="1" Grid.Column="2" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a7" Grid.Row="2" Grid.Column="0" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a8" Grid.Row="2" Grid.Column="1" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+                <TextBox Name="a9" Grid.Row="2" Grid.Column="2" Width="30" Height="30" PreviewTextInput="NumberValidationTextBox"></TextBox>
+            </Grid>
+            <Button Grid.Row="14" Grid.ColumnSpan="2" HorizontalAlignment="Center" Click="Grid_Filter_Button_Click">Apply</Button>
+            <Button Grid.Row="14" Grid.Column="1" Width="30" Click="Clear_Grid_Button_Click">X</Button>
+        </Grid>
+
+        <Label Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Center" FontSize="16">Filter Editing</Label>
+        <Border Grid.Row="1" Grid.Column="3" BorderBrush="Black" BorderThickness="1" Width="256" Height="256" VerticalAlignment="Top" HorizontalAlignment="Center">
+            <Canvas Name="myCanvas" Width="256" Height="256" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                    MouseLeftButtonDown="Canvas_Add_Point" MouseRightButtonDown="Canvas_Delete_Point">
+                <!--<Canvas.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform ScaleY="-1" ScaleX="1" />
+                    </TransformGroup>
+                </Canvas.RenderTransform>-->
+                <Canvas.Background>
+                    <SolidColorBrush Color="White" Opacity="0"/>
+                </Canvas.Background>
+                <!--<Polyline Name="Polyline" Points="0,0 255,255" StrokeThickness="2" Stroke="Blue"></Polyline>-->
+            </Canvas>
+        </Border>
+
+        <GridSplitter Grid.Column="1" Grid.RowSpan="3" Width="1" Background="Black"/>
+        <GridSplitter Grid.Column="2" Grid.RowSpan="3" Width="1" Background="Black"/>
+    </Grid>
+</Window>

@@ -120,15 +120,9 @@
         <Border Grid.Row="1" Grid.Column="3" BorderBrush="Black" BorderThickness="1" Width="256" Height="256" VerticalAlignment="Top" HorizontalAlignment="Center">
             <Canvas Name="myCanvas" Width="256" Height="256" HorizontalAlignment="Center" VerticalAlignment="Center" 
                     MouseLeftButtonDown="Canvas_Add_Point" MouseRightButtonDown="Canvas_Delete_Point">
-                <!--<Canvas.RenderTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleY="-1" ScaleX="1" />
-                    </TransformGroup>
-                </Canvas.RenderTransform>-->
                 <Canvas.Background>
                     <SolidColorBrush Color="White" Opacity="0"/>
                 </Canvas.Background>
-                <!--<Polyline Name="Polyline" Points="0,0 255,255" StrokeThickness="2" Stroke="Blue"></Polyline>-->
             </Canvas>
         </Border>
 

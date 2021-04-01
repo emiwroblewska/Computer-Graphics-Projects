@@ -670,9 +670,6 @@ namespace CG_Project_1
             for (int i = 0; i < 9; i++)
                 gridFilter[i] = 0d;
         }
-
-        
-
         
     }
 }

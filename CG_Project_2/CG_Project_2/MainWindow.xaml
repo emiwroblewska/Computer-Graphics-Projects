@@ -1,0 +1,244 @@
+﻿<Window x:Class="CG_Project_2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CG_Project_2"
+        mc:Ignorable="d"
+        Title="Computer Graphics Project II" Height="600" Width="1200">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Background" Value="#ccffb3" />
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="20"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="160"/>
+            <ColumnDefinition Width="280"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" HorizontalContentAlignment="Center" FontSize="16">Original</Label>
+        <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <Image Name="originalImage" Stretch="None" />
+        </ScrollViewer>
+        <Label Grid.Row="0" Grid.Column="1" HorizontalContentAlignment="Center" FontSize="16">Result</Label>
+        <!--<ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">-->
+        <Image Name="filterImage" Grid.Row="1" Grid.Column="1" MaxHeight="550" Width="auto" Margin="5,0,5,0"/>
+        <!--</ScrollViewer>-->
+        
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Name="LoadImageButton" Click="Load_Image_Click" VerticalAlignment="Center">Load Image</Button>
+            <Button Grid.Column="2" Name="SaveImageButton"  Click="Save_Image_Click" VerticalAlignment="Center">Save Image</Button>
+            <Button Grid.Column="3" Name="ClearImageButton" Click="Clear_Image_Click" VerticalAlignment="Center">Clear Image</Button>
+            <Button Grid.Column="4" Name="grayButton" Click="Convert_To_Grayscale_Click" VerticalAlignment="Center" Background="#FFBAC0C5">To Grayscale</Button>
+            <Button Grid.Column="5" Name="ClearGrayButton" Click="Clear_Grayscale_Click" VerticalAlignment="Center" Background="#FFBAC0C5" IsEnabled="False">Clear Gray Image</Button>
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.Column="2" Grid.RowSpan="3" HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="30"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.ColumnSpan="2" Content="Functional Filters" FontSize="16" HorizontalAlignment="Center"/>
+            <Button Grid.Row="1" MinWidth="130" Height="30" Click="Inversion_Button_Click">Inversion</Button>
+            <Button Grid.Row="2" MinWidth="130" Height="30" Click="Brightness_Button_Click">Brightness correction</Button>
+            <Button Grid.Row="3" MinWidth="130" Height="30" Click="Contrast_Button_Click">Contrast enhancement</Button>
+            <Button Grid.Row="4" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Gamma_Button_Click">Gamma correction</Button>
+            <Button Grid.Row="5" MinWidth="130" Height="30" Click="Custom_Button_Click">Apply Custom filter</Button>
+            <Button Grid.Row="1" Grid.Column="1" Width="30" Height="30" Click="Inversion_Edit_Button_Click">-></Button>
+            <Button Grid.Row="2" Grid.Column="1" Width="30" Height="30" Click="Brightness_Edit_Button_Click">-></Button>
+            <Button Grid.Row="3" Grid.Column="1" Width="30" Height="30" Click="Contrast_Edit_Button_Click">-></Button>
+            <Button Grid.Row="5" Grid.Column="1" Width="30" Height="30" Click="Custom_Clear_Button_Click">-></Button>
+
+            <Label Grid.Row="6" Grid.ColumnSpan="2" Content="Convolution Filters" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Button Grid.Row="7" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Blur_Button_Click">Blur</Button>
+            <Button Grid.Row="8" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Gaussian_Blur_Button_Click">Gaussian blur</Button>
+            <Button Grid.Row="9" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Sharpen_Button_Click">Sharpening</Button>
+            <Button Grid.Row="10" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Edge_Detection_Button_Click">Edge detection</Button>
+            <Button Grid.Row="11" MinWidth="160" Height="30" Grid.ColumnSpan="2" Click="Emboss_Button_Click">Emboss</Button>
+
+            <Label Grid.Row="12" Grid.ColumnSpan="2" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="YCrCb Dithering" />
+            <Grid  Grid.Row="13" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25" />
+                    <RowDefinition Height="25" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="25" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="45"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left">Threshold map:</Label>
+                <ComboBox Name="mapYCrCbComboBox" Grid.Column="2" Grid.Row="0" Height="24" Width="45">
+                    <ComboBoxItem Tag="2" IsSelected="True">2</ComboBoxItem>
+                    <ComboBoxItem Tag="3">3</ComboBoxItem>
+                    <ComboBoxItem Tag="4">4</ComboBoxItem>
+                    <ComboBoxItem Tag="6">6</ComboBoxItem>
+                </ComboBox>
+                <Label Grid.Row="1" Grid.ColumnSpan="2" VerticalAlignment="Center">Color values per channel:</Label>
+                <StackPanel Grid.Row="2" Grid.RowSpan="2" Name="YCrCbPanel" Width="90" >
+                    <DockPanel>
+                        <Label  HorizontalAlignment="Left">Y:</Label>
+                        <TextBox Name="ValueY" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                    </DockPanel>
+                    <DockPanel>
+                        <Label HorizontalAlignment="Left">Cr:</Label>
+                        <TextBox Name="ValueCr" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                    </DockPanel>
+                    <DockPanel>
+                        <Label HorizontalAlignment="Left">Cb:</Label>
+                        <TextBox Name="ValueCb" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                    </DockPanel>
+                </StackPanel>
+                <Button Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Name="YCrCbBtn" Width="45" VerticalAlignment="Center" Click="Apply_YCrCb_Dithering_Click">Apply</Button>
+            </Grid>
+        </Grid>
+
+        <Label Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Center" FontSize="16">Filter Editing</Label>
+        <Grid Grid.Row="1" Grid.Column="3" Grid.RowSpan="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="260"/>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0"  BorderBrush="Black" BorderThickness="1" Width="256" Height="256" VerticalAlignment="Top" HorizontalAlignment="Center">
+                <Canvas Name="myCanvas" Width="256" Height="256" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                        MouseLeftButtonDown="Canvas_Add_Point" MouseRightButtonDown="Canvas_Delete_Point">
+                    <Canvas.Background>
+                        <SolidColorBrush Color="White" Opacity="0"/>
+                    </Canvas.Background>
+                </Canvas>
+            </Border>
+
+            <GroupBox Grid.Row="1" Header="Ordered Dithering" Margin="5,0,5,0" Padding="5,5,5,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="3*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Center">Threshold map size:</Label>
+                    <ComboBox Name="mapsComboBox" Grid.Column="2" Grid.Row="0" Height="24" Width="90">
+                        <ComboBoxItem Tag="2" IsSelected="True">2</ComboBoxItem>
+                        <ComboBoxItem Tag="3">3</ComboBoxItem>
+                        <ComboBoxItem Tag="4">4</ComboBoxItem>
+                        <ComboBoxItem Tag="6">6</ComboBoxItem>
+                    </ComboBox>
+                    <Label Grid.Column="0" Grid.Row="1"  Grid.ColumnSpan="2" VerticalAlignment="Center">Color values per channel:</Label>
+                    <StackPanel Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" Name="rgbPanel" Width="90" >
+                        <DockPanel>
+                            <Label Foreground="Red" HorizontalAlignment="Left">Red:</Label>
+                            <TextBox Name="ValuePerRed" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Foreground="Green" HorizontalAlignment="Left">Green:</Label>
+                            <TextBox Name="ValuePerGreen" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Foreground="Blue" HorizontalAlignment="Left">Blue:</Label>
+                            <TextBox Name="ValuePerBlue" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" Name="grayPanel" Width="90" Visibility="Collapsed">
+                        <DockPanel>
+                            <Label Foreground="Gray" HorizontalAlignment="Left">K =</Label>
+                            <TextBox Name="ValuePerChannel" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Width="80" VerticalAlignment="Center" Click="Apply_Ordered_Dithering_Click">Apply</Button>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="2" Header="Uniform Quantization" Margin="5,0,5,5" Padding="0,10,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*" />
+                        <ColumnDefinition Width="3*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center">Color values per channel:</Label>
+                    <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Name="rgbPanelQuant" Width="90">
+                        <DockPanel>
+                            <Label Foreground="Red" HorizontalAlignment="Left">Red:</Label>
+                            <TextBox Name="redLevels" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">4</TextBox>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Foreground="Green" HorizontalAlignment="Left">Green:</Label>
+                            <TextBox Name="greenLevels" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">8</TextBox>
+                        </DockPanel>
+                        <DockPanel>
+                            <Label Foreground="Blue" HorizontalAlignment="Left">Blue:</Label>
+                            <TextBox Name="blueLevels" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">8</TextBox>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Name="grayPanelQuant" Width="90" Visibility="Collapsed">
+                        <DockPanel>
+                            <Label Foreground="Gray" HorizontalAlignment="Left">K =</Label>
+                            <TextBox Name="grayLevels" Width="40" Height="20" PreviewTextInput="OnlyNumbersValidationTextBox" HorizontalAlignment="Right">2</TextBox>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="0" Grid.Row="2" Width="80" VerticalAlignment="Center" Click="Apply_Uniform_Quantization_Click">Apply</Button>
+                </Grid>
+            </GroupBox>
+
+        </Grid> 
+        
+        <GridSplitter Grid.Column="1" Grid.RowSpan="3" Width="1" Background="Black"/>
+        <GridSplitter Grid.Column="2" Grid.RowSpan="3" Width="1" Background="Black"/>
+    </Grid>
+</Window>

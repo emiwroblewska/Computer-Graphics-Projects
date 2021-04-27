@@ -28,11 +28,13 @@ namespace CG_Project_3
         private Modes mode;
         private bool firstClick = false;
         private bool polygonDrawing = false;
-        private bool polygonCenterEdit = false;
         private bool circlePointEdit = false;
-        private bool linePointStart = false;
         private bool movingPoint = false;
-        private int currentIndex = 0;
+
+        private int Index1 = 0;
+        private int Index2 = 0;
+        private int polygonEditMode = 0; //0 - polygon vertex, 1 - polygon center, 2 - polygon edge
+        private int lineEditMode = 0;    //0 - line start, 1 - line center, 2 - line end
         private Point lastPosition = new Point(-1,-1);
         private System.Windows.Media.Color lineColor = Colors.Black;
 
@@ -92,6 +94,7 @@ namespace CG_Project_3
                 {
                     fs.Close();
                 }
+                UpdateShapes();
                 RedrawImage();
             }
         }
@@ -133,6 +136,9 @@ namespace CG_Project_3
                 BitmapPalettes.Halftone256);
             Image.Source = bitmap;
             shapes.Clear();
+            editPoints.Clear();
+            selectedShape = null;
+            currentPolygon = new Polygon();
             UncheckAll();
         }
 
@@ -144,10 +150,7 @@ namespace CG_Project_3
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UncheckAll();
-            //RedrawImage();
-            //Draw_Mode_Checked(sender, e);
-            //if (!(DrawButton is null))
-            //    DrawButton.IsChecked = true;
+            
             if(!(ThicknessComboBox is null))
             {
                 if(shapeComboBox.SelectedIndex == 2)
@@ -166,30 +169,58 @@ namespace CG_Project_3
         private void Draw_Mode_Checked(object sender, RoutedEventArgs e)
         {
             mode = Modes.DrawingMode;
+            shapeComboBox.IsEnabled = true;
+            if(shapeComboBox.SelectedIndex == 2)
+            {
+                ThicknessComboBox.IsEnabled = false;
+                ThickLabel.Foreground = new SolidColorBrush(Colors.DimGray);
+            }
+            else
+            {
+                ThicknessComboBox.IsEnabled = true;
+                ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
+            }
+            UncheckAll();
             RedrawImage();
         }
 
         private void Edit_Mode_Checked(object sender, RoutedEventArgs e)
         {
             mode = Modes.EditMode;
+            shapeComboBox.IsEnabled = false;
+            ThicknessComboBox.IsEnabled = true;
+            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
+            UncheckAll();
             RedrawImage();
         }
 
         private void Thick_Mode_Checked(object sender, RoutedEventArgs e)
         {
             mode = Modes.ThickMode;
+            shapeComboBox.IsEnabled = false;
+            ThicknessComboBox.IsEnabled = true;
+            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
+            UncheckAll();
             RedrawImage();
         }
 
         private void Color_Mode_Checked(object sender, RoutedEventArgs e)
         {
             mode = Modes.ColorMode;
+            shapeComboBox.IsEnabled = false;
+            ThicknessComboBox.IsEnabled = true;
+            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
+            UncheckAll();
             RedrawImage();
         }
 
         private void Delete_Mode_Checked(object sender, RoutedEventArgs e)
         {
             mode = Modes.DeleteMode;
+            shapeComboBox.IsEnabled = false;
+            ThicknessComboBox.IsEnabled = true;
+            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
+            UncheckAll();
             RedrawImage();
         }
 
@@ -203,6 +234,7 @@ namespace CG_Project_3
 
         private void Anti_Aliasing_Changed(object sender, RoutedEventArgs e)
         {
+            UpdateShapes();
             RedrawImage();
         }
 
@@ -210,8 +242,8 @@ namespace CG_Project_3
         {
             firstClick = false;
             circlePointEdit = false;
-            linePointStart = false;
-            polygonCenterEdit = false;
+            lineEditMode = 0;
+            polygonEditMode = 0;
             polygonDrawing = false;
             editPoints.Clear();
         }
@@ -234,10 +266,10 @@ namespace CG_Project_3
                     }
                     break;
                 case Modes.ThickMode:
-                    ChangeThickness(e);
+                    ChangeColorThickness(e, false);
                     break;
                 case Modes.ColorMode:
-                    ChangeColor(e);
+                    ChangeColorThickness(e, true);
                     break;
                 case Modes.DeleteMode:
                     DeleteShape(e);
@@ -260,49 +292,69 @@ namespace CG_Project_3
                     if (circlePointEdit)
                     {
                         s.Radius = (int)Distance(s.Origin, x, y);
-                        s.AllPixels = DrawingAlgorithms.MidPointCircle(s.Origin.X, s.Origin.Y, s.Radius, s.shapeColor);
+                        s.AllPixels = DrawingAlgorithms.MidpointCircle(s.Origin.X, s.Origin.Y, s.Radius, s.shapeColor);
                     }
                     else
                     {
                         s.Origin = new PixelPoint(x, y, s.shapeColor);
-                        s.AllPixels = DrawingAlgorithms.MidPointCircle(x, y, s.Radius, s.shapeColor);
+                        s.AllPixels = DrawingAlgorithms.MidpointCircle(x, y, s.Radius, s.shapeColor);
                     }
                 }
                 if (selectedShape is Line)
                 { 
                     var s = selectedShape as Line;
-                    if (linePointStart)
+                    switch(lineEditMode)
                     {
-                        s.Start = new PixelPoint(x, y, s.shapeColor);
-                        s.AllPixels = DrawingAlgorithms.lineDDA(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, s.GetThickness());
-                    }
-                    else
-                    {
-                        s.End = new PixelPoint(x, y, s.shapeColor);
-                        s.AllPixels = DrawingAlgorithms.lineDDA(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, s.GetThickness());
+                        case 0:
+                            s.Start = new PixelPoint(x, y, s.shapeColor);
+                            UpdateLine(s);
+                            break;
+                        case 1:
+                            int xDiff = x - (int)lastPosition.X;
+                            int yDiff = y - (int)lastPosition.Y;
+                            s.Start = new PixelPoint(s.Start.X + xDiff, s.Start.Y + yDiff, s.shapeColor);
+                            s.End = new PixelPoint(s.End.X + xDiff, s.End.Y + yDiff, s.shapeColor);
+                            UpdateLine(s);
+                            lastPosition.X = x;
+                            lastPosition.Y = y;
+                            break;
+                        case 2:
+                            s.End = new PixelPoint(x, y, s.shapeColor);
+                            UpdateLine(s);
+                            break;
                     }
                 }
                 if (selectedShape is Polygon)
                 {
                     var s = selectedShape as Polygon;
-                    if (polygonCenterEdit)
+                    switch(polygonEditMode)
                     {
-                        int xDiff = x - (int)lastPosition.X;
-                        int yDiff = y - (int)lastPosition.Y;
-                        for (int i = 0; i < s.Vertices.Count; i++)
-                        {
-                            s.Vertices[i].X += xDiff;
-                            s.Vertices[i].Y += yDiff;
-                        }
-                        UpdatePolygon(s);
-                        lastPosition.X = x;
-                        lastPosition.Y = y;
-                    }
-                    else
-                    {
-                        s.Vertices[currentIndex] = new PixelPoint(x, y, s.shapeColor);
-                        s.AllPixels.Clear();
-                        UpdatePolygon(s);
+                        case 0: //Polygon Vertex
+                            s.Vertices[Index1] = new PixelPoint(x, y, s.shapeColor);
+                            s.AllPixels.Clear();
+                            UpdatePolygon(s);
+                            break;
+                        case 1: //Polygon Center
+                            int xDiff = x - (int)lastPosition.X;
+                            int yDiff = y - (int)lastPosition.Y;
+                            for (int i = 0; i < s.Vertices.Count; i++)
+                            {
+                                s.Vertices[i].X += xDiff;
+                                s.Vertices[i].Y += yDiff;
+                            }
+                            UpdatePolygon(s);
+                            lastPosition.X = x;
+                            lastPosition.Y = y;
+                            break;
+                        case 2: //Polygon Edge
+                            int dx = x - (int)lastPosition.X;
+                            int dy = y - (int)lastPosition.Y;
+                            s.Vertices[Index1] = new PixelPoint(s.Vertices[Index1].X + dx, s.Vertices[Index1].Y + dy, s.shapeColor);
+                            s.Vertices[Index2] = new PixelPoint(s.Vertices[Index2].X + dx, s.Vertices[Index2].Y + dy, s.shapeColor);
+                            UpdatePolygon(s);
+                            lastPosition.X = x;
+                            lastPosition.Y = y;
+                            break;
                     }
                 }
                 RedrawImage();
@@ -319,6 +371,8 @@ namespace CG_Project_3
 
         private void Image_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (mode == Modes.EditMode && selectedShape != null) movingPoint = false;
+            if (shapeComboBox.SelectedIndex == 1) currentPolygon = new Polygon();
             UncheckAll();
             RedrawImage();
         }
@@ -366,7 +420,10 @@ namespace CG_Project_3
                 PixelPoint start = new PixelPoint((int)lastPosition.X, (int)lastPosition.Y, c);
                 PixelPoint end = new PixelPoint(x, y, c);
                 Line line = new Line(start, end, c, t);
-                line.AllPixels = DrawingAlgorithms.lineDDA(start.X, start.Y, end.X, end.Y, c, t);
+                if (AntiAliasing.IsChecked == true)
+                    line.AllPixels = DrawingAlgorithms.GuptaSproull(start.X, start.Y, end.X, end.Y, c, (double)t);
+                else
+                    line.AllPixels = DrawingAlgorithms.lineDDA(start.X, start.Y, end.X, end.Y, c, t);
                 line.DrawPixels(bitmap);
                 shapes.Add(line);
                 firstClick = false;
@@ -389,7 +446,7 @@ namespace CG_Project_3
                 Colour c = new Colour(lineColor.R, lineColor.G, lineColor.B);
                 int radius = (int)Math.Round(Math.Sqrt(Math.Pow(lastPosition.X - x, 2) + Math.Pow(lastPosition.Y - y, 2)));
                 Circle circle = new Circle(new PixelPoint((int)lastPosition.X, (int)lastPosition.Y, c), radius, c);
-                circle.AllPixels = DrawingAlgorithms.MidPointCircle((int)lastPosition.X, (int)lastPosition.Y, radius, c);
+                circle.AllPixels = DrawingAlgorithms.MidpointCircle((int)lastPosition.X, (int)lastPosition.Y, radius, c);
                 circle.DrawPixels(bitmap);
                 shapes.Add(circle);
                 firstClick = false;
@@ -415,7 +472,10 @@ namespace CG_Project_3
                 currentPolygon.shapeColor = c;
                 currentPolygon.AddVertex(new PixelPoint((int)lastPosition.X, (int)lastPosition.Y, c));
                 currentPolygon.AddVertex(new PixelPoint(x, y, c));
-                currentPolygon.AllPixels = DrawingAlgorithms.lineDDA((int)lastPosition.X, (int)lastPosition.Y, x, y, c, t);
+                if(AntiAliasing.IsChecked == true)
+                    currentPolygon.AllPixels = DrawingAlgorithms.GuptaSproull((int)lastPosition.X, (int)lastPosition.Y, x, y, c, (double)t);
+                else
+                    currentPolygon.AllPixels = DrawingAlgorithms.lineDDA((int)lastPosition.X, (int)lastPosition.Y, x, y, c, t);
                 currentPolygon.DrawPixels(bitmap);
                 polygonDrawing = true;
                 lastPosition.X = x;
@@ -424,9 +484,13 @@ namespace CG_Project_3
             else if (firstClick && polygonDrawing)
             {
                 PixelPoint start = currentPolygon.Vertices[0];
-                if (x > start.X - 30 && x < start.X + 30 && y > start.Y - 30 && y < start.Y + 30)
+                if (x > start.X - 20 && x < start.X + 20 && y > start.Y - 20 && y < start.Y + 20)
                 {
-                    currentPolygon.AllPixels = currentPolygon.AllPixels.Union(DrawingAlgorithms.lineDDA((int)lastPosition.X,
+                    if (AntiAliasing.IsChecked == true)
+                        currentPolygon.AllPixels = currentPolygon.AllPixels.Union(DrawingAlgorithms.GuptaSproull((int)lastPosition.X,
+                        (int)lastPosition.Y, start.X, start.Y, start.MyColor, (double)currentPolygon.GetThickness())).ToList();
+                    else
+                        currentPolygon.AllPixels = currentPolygon.AllPixels.Union(DrawingAlgorithms.lineDDA((int)lastPosition.X,
                         (int)lastPosition.Y, start.X, start.Y, start.MyColor, currentPolygon.GetThickness())).ToList();
                     currentPolygon.DrawPixels(bitmap);
                     shapes.Add(currentPolygon);
@@ -441,8 +505,10 @@ namespace CG_Project_3
                     Colour c = new Colour(lineColor.R, lineColor.G, lineColor.B);
                     currentPolygon.SetThickness(t);
                     currentPolygon.AddVertex(new PixelPoint(x, y, c));
-                    currentPolygon.AllPixels = currentPolygon.AllPixels.Union(DrawingAlgorithms.lineDDA((int)lastPosition.X,
-                        (int)lastPosition.Y, x, y, c, t)).ToList();
+                    if(AntiAliasing.IsChecked == true)
+                        currentPolygon.AllPixels = currentPolygon.AllPixels.Union(DrawingAlgorithms.GuptaSproull((int)lastPosition.X, (int)lastPosition.Y, x, y, c, (double)t)).ToList();
+                    else
+                        currentPolygon.AllPixels = currentPolygon.AllPixels.Union(DrawingAlgorithms.lineDDA((int)lastPosition.X, (int)lastPosition.Y, x, y, c, t)).ToList();
                     currentPolygon.DrawPixels(bitmap);
                     lastPosition.X = x;
                     lastPosition.Y = y;
@@ -465,15 +531,39 @@ namespace CG_Project_3
             {
                 if (s.Vertices.IndexOf(pp) == s.Vertices.Count - 1)
                 {
-                    s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.lineDDA(pp.X, pp.Y, s.Vertices[0].X, s.Vertices[0].Y,
-                         s.shapeColor, s.GetThickness())).ToList();
+                    if (AntiAliasing.IsChecked == true)
+                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.GuptaSproull(pp.X, pp.Y, s.Vertices[0].X, s.Vertices[0].Y, s.shapeColor, (double)s.GetThickness())).ToList();
+                    else
+                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.lineDDA(pp.X, pp.Y, s.Vertices[0].X, s.Vertices[0].Y, s.shapeColor, s.GetThickness())).ToList();
                 }
                 else
                 {
                     int idx = s.Vertices.IndexOf(pp);
-                    s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.lineDDA(pp.X, pp.Y, s.Vertices.ElementAt(idx + 1).X,
+                    if (AntiAliasing.IsChecked == true)
+                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.GuptaSproull(pp.X, pp.Y, s.Vertices.ElementAt(idx + 1).X,
+                        s.Vertices.ElementAt(idx + 1).Y, s.shapeColor, (double)s.GetThickness())).ToList();
+                    else
+                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.lineDDA(pp.X, pp.Y, s.Vertices.ElementAt(idx + 1).X,
                         s.Vertices.ElementAt(idx + 1).Y, s.shapeColor, s.GetThickness())).ToList();
                 }
+            }
+        }
+
+        private void UpdateLine(Line s)
+        {
+            if (AntiAliasing.IsChecked == true)
+                s.AllPixels = DrawingAlgorithms.GuptaSproull(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, (double)s.GetThickness());
+            else
+                s.AllPixels = DrawingAlgorithms.lineDDA(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, s.GetThickness());
+        }
+
+        private void UpdateShapes()
+        {
+            foreach (Shape shape in shapes)
+            {
+                if (shape is Circle) continue;
+                if (shape is Polygon) UpdatePolygon(shape as Polygon);
+                if (shape is Line) UpdateLine(shape as Line);
             }
         }
 
@@ -513,15 +603,22 @@ namespace CG_Project_3
                 if (shape is Line)
                 {
                     var s = shape as Line;
+                    PixelPoint center = new PixelPoint((s.Start.X + s.End.X) / 2, (s.Start.Y + s.End.Y) / 2, s.shapeColor);
                     if (isNearPoint(s.Start, x, y))
                     {
-                        linePointStart = true;
+                        lineEditMode = 0;
+                        selectedShape = s;
+                        return true;
+                    }
+                    if (isNearPoint(center, x, y))
+                    {
+                        lineEditMode = 1;
                         selectedShape = s;
                         return true;
                     }
                     if (isNearPoint(s.End, x, y))
                     {
-                        linePointStart = false;
+                        lineEditMode = 2;
                         selectedShape = s;
                         return true;
                     }
@@ -533,18 +630,33 @@ namespace CG_Project_3
                     PixelPoint center = new PixelPoint(cx, cy, editColor);
                     if (isNearPoint(center, x, y))
                     {
-                        polygonCenterEdit = true;
+                        polygonEditMode = 1;
                         selectedShape = s;
                         return true;
                     }
                     foreach(PixelPoint v in s.Vertices)
                     {
+                        int idx = s.Vertices.IndexOf(v);
                         if (isNearPoint(v, x, y))
                         {
-                            polygonCenterEdit = false;
-                            currentIndex = s.Vertices.IndexOf(v);
+                            polygonEditMode = 0;
+                            Index1 = s.Vertices.IndexOf(v);
                             selectedShape = s;
                             return true;
+                        }
+                        else
+                        {
+                            PixelPoint tmp;
+                            if (idx == s.Vertices.Count - 1) tmp = new PixelPoint((v.X + s.Vertices[0].X) / 2, (v.Y + s.Vertices[0].Y) / 2, s.shapeColor);
+                            else tmp = new PixelPoint((v.X + s.Vertices[idx + 1].X) / 2, (v.Y + s.Vertices[idx + 1].Y) / 2, s.shapeColor);
+                            if (isNearPoint(tmp, x, y))
+                            {
+                                polygonEditMode = 2;
+                                Index1 = idx;
+                                Index2 = idx + 1 > s.Vertices.Count - 1 ? 0 : idx + 1;
+                                selectedShape = s;
+                                return true;
+                            }
                         }
                     }
                 }
@@ -588,9 +700,15 @@ namespace CG_Project_3
                     AddEditPoint(pp, 21);
                     foreach (PixelPoint v in s.Vertices)
                     {
-                        PixelPoint tmp = new PixelPoint(v.X, v.Y, editColor);
-                        editPoints.Add(tmp);
-                        AddEditPoint(tmp, 21);
+                        int idx = s.Vertices.IndexOf(v);
+                        PixelPoint edgeCenter;
+                        if (idx == s.Vertices.Count - 1) edgeCenter = new PixelPoint((v.X + s.Vertices[0].X) / 2, (v.Y + s.Vertices[0].Y) / 2, editColor);
+                        else edgeCenter = new PixelPoint((v.X + s.Vertices[idx + 1].X) /2, (v.Y + s.Vertices[idx + 1].Y) / 2, editColor);
+                        editPoints.Add(edgeCenter);
+                        AddEditPoint(edgeCenter, 21);
+                        PixelPoint vertex = new PixelPoint(v.X, v.Y, editColor);
+                        editPoints.Add(vertex);
+                        AddEditPoint(vertex, 21);
                     }
                 }
                 else if (shape is Line)
@@ -598,10 +716,13 @@ namespace CG_Project_3
                     var s = shape as Line;
                     PixelPoint p1 = new PixelPoint(s.Start.X, s.Start.Y, editColor);
                     PixelPoint p2 = new PixelPoint(s.End.X, s.End.Y, editColor);
+                    PixelPoint center = new PixelPoint((s.Start.X + s.End.X) / 2, (s.Start.Y + s.End.Y) / 2, editColor);
                     editPoints.Add(p1);
                     AddEditPoint(p1, 21);
                     editPoints.Add(p2);
                     AddEditPoint(p2, 21);
+                    editPoints.Add(center);
+                    AddEditPoint(center, 21);
                 }
             }
         }
@@ -674,7 +795,7 @@ namespace CG_Project_3
             }
         }
 
-        private Shape GetCurrentShape(MouseButtonEventArgs e)
+        private Shape GetClickedShape(MouseButtonEventArgs e)
         {
             int x = (int)Math.Round(e.GetPosition(Image).X);
             int y = (int)Math.Round(e.GetPosition(Image).Y);
@@ -703,7 +824,7 @@ namespace CG_Project_3
 
         private void DeleteShape(MouseButtonEventArgs e)
         {
-            Shape toDelete = GetCurrentShape(e);
+            Shape toDelete = GetClickedShape(e);
             if (toDelete != null)
             {
                 shapes.Remove(toDelete);
@@ -711,49 +832,28 @@ namespace CG_Project_3
             }
         }
 
-        private void ChangeThickness(MouseButtonEventArgs e)
+        private void ChangeColorThickness(MouseButtonEventArgs e, bool color)
         {
-            Shape thick = GetCurrentShape(e);
+            Shape thick = GetClickedShape(e);
             if (thick != null)
             {
-                if (thick is Circle) return;
-                int t = Convert.ToInt32(ThicknessComboBox.Text.ToString());
-                thick.SetThickness(t);
-                if (thick is Line)
+                if (color == true)
                 {
-                    var s = thick as Line;
-                    s.AllPixels = DrawingAlgorithms.lineDDA(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, s.GetThickness());
+                    Colour c = new Colour(lineColor.R, lineColor.G, lineColor.B);
+                    thick.shapeColor = c;
                 }
-                if (thick is Polygon)
+                else
                 {
-                    var s = thick as Polygon;
-                    UpdatePolygon(s);
+                    int t = Convert.ToInt32(ThicknessComboBox.Text.ToString());
+                    thick.SetThickness(t);
                 }
-                RedrawImage();
-            }
-        }
-
-        private void ChangeColor(MouseButtonEventArgs e)
-        {
-            Shape thick = GetCurrentShape(e);
-            if (thick != null)
-            {
-                Colour c = new Colour(lineColor.R, lineColor.G, lineColor.B);
-                thick.shapeColor = c;
-                if (thick is Line)
-                {
-                    var s = thick as Line;
-                    s.AllPixels = DrawingAlgorithms.lineDDA(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, s.GetThickness());
-                }
-                if (thick is Polygon)
-                {
-                    var s = thick as Polygon;
-                    UpdatePolygon(s);
-                }
+                if (thick is Line) UpdateLine(thick as Line);
+                if (thick is Polygon) UpdatePolygon(thick as Polygon);
                 if (thick is Circle)
                 {
+                    if (color == false) return;
                     var s = thick as Circle;
-                    s.AllPixels = DrawingAlgorithms.MidPointCircle(s.Origin.X, s.Origin.Y, s.Radius, s.shapeColor);
+                    s.AllPixels = DrawingAlgorithms.MidpointCircle(s.Origin.X, s.Origin.Y, s.Radius, s.shapeColor);
                 }
                 RedrawImage();
             }

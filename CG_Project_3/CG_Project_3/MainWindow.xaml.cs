@@ -335,11 +335,11 @@ namespace CG_Project_3
                     var s = selectedShape as Capsule;
                     switch (capsuleEditMode)
                     {
-                        case 0:
+                        case 0: //Capsule Origin A
                             s.OriginA = new PixelPoint(x, y, s.shapeColor);
                             s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
                             break;
-                        case 1:
+                        case 1: //Capsule Center
                             int dx = x - (int)lastPosition.X;
                             int dy = y - (int)lastPosition.Y;
                             s.OriginA = new PixelPoint(s.OriginA.X + dx, s.OriginA.Y + dy, s.shapeColor);
@@ -348,11 +348,11 @@ namespace CG_Project_3
                             lastPosition.X = x;
                             lastPosition.Y = y;
                             break;
-                        case 2:
+                        case 2: //Capsule Origin B
                             s.OriginB = new PixelPoint(x, y, s.shapeColor);
                             s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
                             break;
-                        case 3:
+                        case 3: //Capsule Radius
                             if(EditionMethods.Distance(s.OriginA, x, y) <= s.Radius + 10) 
                                 s.Radius = (int)EditionMethods.Distance(s.OriginA, x, y);
                             else s.Radius = (int)EditionMethods.Distance(s.OriginB, x, y);

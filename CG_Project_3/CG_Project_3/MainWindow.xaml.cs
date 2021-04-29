@@ -28,6 +28,7 @@ namespace CG_Project_3
         private Modes mode;
         private bool firstClick = false;
         private bool polygonDrawing = false;
+        private bool capsuleDrawing = false;
         private bool circlePointEdit = false;
         private bool movingPoint = false;
 
@@ -35,6 +36,8 @@ namespace CG_Project_3
         private int Index2 = 0;
         private int polygonEditMode = 0; //0 - polygon vertex, 1 - polygon center, 2 - polygon edge
         private int lineEditMode = 0;    //0 - line start, 1 - line center, 2 - line end
+        private int capsuleEditMode = 0; //0 - capsule origin A, 1 - capsule center, 2 - capsule origin B, 3 - capsule radius
+        private Point firstPosition = new Point(-1, -1);
         private Point lastPosition = new Point(-1,-1);
         private System.Windows.Media.Color lineColor = Colors.Black;
 
@@ -94,7 +97,7 @@ namespace CG_Project_3
                 {
                     fs.Close();
                 }
-                UpdateShapes();
+                EditionMethods.UpdateShapes(shapes, AntiAliasing.IsChecked == true);
                 RedrawImage();
             }
         }
@@ -150,36 +153,12 @@ namespace CG_Project_3
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UncheckAll();
-            
-            if(!(ThicknessComboBox is null))
-            {
-                if(shapeComboBox.SelectedIndex == 2)
-                {
-                    ThicknessComboBox.IsEnabled = false;
-                    ThickLabel.Foreground = new SolidColorBrush(Colors.DimGray);
-                }
-                else
-                {
-                    ThicknessComboBox.IsEnabled = true;
-                    ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
-                }
-            }
         }
 
         private void Draw_Mode_Checked(object sender, RoutedEventArgs e)
         {
             mode = Modes.DrawingMode;
             shapeComboBox.IsEnabled = true;
-            if(shapeComboBox.SelectedIndex == 2)
-            {
-                ThicknessComboBox.IsEnabled = false;
-                ThickLabel.Foreground = new SolidColorBrush(Colors.DimGray);
-            }
-            else
-            {
-                ThicknessComboBox.IsEnabled = true;
-                ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
-            }
             UncheckAll();
             RedrawImage();
         }
@@ -188,8 +167,6 @@ namespace CG_Project_3
         {
             mode = Modes.EditMode;
             shapeComboBox.IsEnabled = false;
-            ThicknessComboBox.IsEnabled = true;
-            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
             UncheckAll();
             RedrawImage();
         }
@@ -198,8 +175,6 @@ namespace CG_Project_3
         {
             mode = Modes.ThickMode;
             shapeComboBox.IsEnabled = false;
-            ThicknessComboBox.IsEnabled = true;
-            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
             UncheckAll();
             RedrawImage();
         }
@@ -208,8 +183,6 @@ namespace CG_Project_3
         {
             mode = Modes.ColorMode;
             shapeComboBox.IsEnabled = false;
-            ThicknessComboBox.IsEnabled = true;
-            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
             UncheckAll();
             RedrawImage();
         }
@@ -218,8 +191,6 @@ namespace CG_Project_3
         {
             mode = Modes.DeleteMode;
             shapeComboBox.IsEnabled = false;
-            ThicknessComboBox.IsEnabled = true;
-            ThickLabel.Foreground = new SolidColorBrush(Colors.Black);
             UncheckAll();
             RedrawImage();
         }
@@ -234,7 +205,7 @@ namespace CG_Project_3
 
         private void Anti_Aliasing_Changed(object sender, RoutedEventArgs e)
         {
-            UpdateShapes();
+            EditionMethods.UpdateShapes(shapes, AntiAliasing.IsChecked == true);
             RedrawImage();
         }
 
@@ -244,11 +215,13 @@ namespace CG_Project_3
             circlePointEdit = false;
             lineEditMode = 0;
             polygonEditMode = 0;
+            capsuleEditMode = 0;
+            capsuleDrawing = false;
             polygonDrawing = false;
             editPoints.Clear();
         }
 
-        // ---------------------- Drawing Mechanisms ----------------------
+        // ---------------------- Drawing Mechanisms -----------------------
         private void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
             switch (mode)
@@ -257,6 +230,7 @@ namespace CG_Project_3
                     if (shapeComboBox.SelectedIndex == 0) DrawLine(e);
                     if (shapeComboBox.SelectedIndex == 1) DrawPolygon(e);
                     if (shapeComboBox.SelectedIndex == 2) DrawCircle(e);
+                    if (shapeComboBox.SelectedIndex == 3) DrawCapsule(e);
                     break;
                 case Modes.EditMode:
                     if (FindSelectedPoint(e))
@@ -277,7 +251,6 @@ namespace CG_Project_3
                 default:
                     break;
             }
-            //RedrawImage();
         }
 
         private void Image_MouseMove(object sender, MouseEventArgs e)
@@ -291,7 +264,7 @@ namespace CG_Project_3
                     var s = selectedShape as Circle;
                     if (circlePointEdit)
                     {
-                        s.Radius = (int)Distance(s.Origin, x, y);
+                        s.Radius = (int)EditionMethods.Distance(s.Origin, x, y);
                         s.AllPixels = DrawingAlgorithms.MidpointCircle(s.Origin.X, s.Origin.Y, s.Radius, s.shapeColor);
                     }
                     else
@@ -307,20 +280,20 @@ namespace CG_Project_3
                     {
                         case 0:
                             s.Start = new PixelPoint(x, y, s.shapeColor);
-                            UpdateLine(s);
+                            EditionMethods.UpdateLine(s, AntiAliasing.IsChecked == true);
                             break;
                         case 1:
                             int xDiff = x - (int)lastPosition.X;
                             int yDiff = y - (int)lastPosition.Y;
                             s.Start = new PixelPoint(s.Start.X + xDiff, s.Start.Y + yDiff, s.shapeColor);
                             s.End = new PixelPoint(s.End.X + xDiff, s.End.Y + yDiff, s.shapeColor);
-                            UpdateLine(s);
+                            EditionMethods.UpdateLine(s, AntiAliasing.IsChecked == true);
                             lastPosition.X = x;
                             lastPosition.Y = y;
                             break;
                         case 2:
                             s.End = new PixelPoint(x, y, s.shapeColor);
-                            UpdateLine(s);
+                            EditionMethods.UpdateLine(s, AntiAliasing.IsChecked == true);
                             break;
                     }
                 }
@@ -332,7 +305,7 @@ namespace CG_Project_3
                         case 0: //Polygon Vertex
                             s.Vertices[Index1] = new PixelPoint(x, y, s.shapeColor);
                             s.AllPixels.Clear();
-                            UpdatePolygon(s);
+                            EditionMethods.UpdatePolygon(s, AntiAliasing.IsChecked == true);
                             break;
                         case 1: //Polygon Center
                             int xDiff = x - (int)lastPosition.X;
@@ -342,7 +315,7 @@ namespace CG_Project_3
                                 s.Vertices[i].X += xDiff;
                                 s.Vertices[i].Y += yDiff;
                             }
-                            UpdatePolygon(s);
+                            EditionMethods.UpdatePolygon(s, AntiAliasing.IsChecked == true);
                             lastPosition.X = x;
                             lastPosition.Y = y;
                             break;
@@ -351,9 +324,39 @@ namespace CG_Project_3
                             int dy = y - (int)lastPosition.Y;
                             s.Vertices[Index1] = new PixelPoint(s.Vertices[Index1].X + dx, s.Vertices[Index1].Y + dy, s.shapeColor);
                             s.Vertices[Index2] = new PixelPoint(s.Vertices[Index2].X + dx, s.Vertices[Index2].Y + dy, s.shapeColor);
-                            UpdatePolygon(s);
+                            EditionMethods.UpdatePolygon(s, AntiAliasing.IsChecked == true);
                             lastPosition.X = x;
                             lastPosition.Y = y;
+                            break;
+                    }
+                }
+                if (selectedShape is Capsule)
+                {
+                    var s = selectedShape as Capsule;
+                    switch (capsuleEditMode)
+                    {
+                        case 0:
+                            s.OriginA = new PixelPoint(x, y, s.shapeColor);
+                            s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
+                            break;
+                        case 1:
+                            int dx = x - (int)lastPosition.X;
+                            int dy = y - (int)lastPosition.Y;
+                            s.OriginA = new PixelPoint(s.OriginA.X + dx, s.OriginA.Y + dy, s.shapeColor);
+                            s.OriginB = new PixelPoint(s.OriginB.X + dx, s.OriginB.Y + dy, s.shapeColor);
+                            s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
+                            lastPosition.X = x;
+                            lastPosition.Y = y;
+                            break;
+                        case 2:
+                            s.OriginB = new PixelPoint(x, y, s.shapeColor);
+                            s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
+                            break;
+                        case 3:
+                            if(EditionMethods.Distance(s.OriginA, x, y) <= s.Radius + 10) 
+                                s.Radius = (int)EditionMethods.Distance(s.OriginA, x, y);
+                            else s.Radius = (int)EditionMethods.Distance(s.OriginB, x, y);
+                            s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
                             break;
                     }
                 }
@@ -396,13 +399,13 @@ namespace CG_Project_3
                 }
                 if (mode == Modes.EditMode)
                 {
-                    FindEditPoints();
-                    DrawEditPoints();
+                    EditionMethods.FindEditPoints(shapes, editPoints, editColor);
+                    EditionMethods.DrawEditPoints(bitmap, editPoints);
                 }
                 if (mode == Modes.DeleteMode || mode == Modes.ColorMode || mode == Modes.ThickMode)
                 {
-                    FindDeletePoints();
-                    DrawEditPoints();
+                    EditionMethods.FindDeletePoints(shapes, editPoints, editColor);
+                    EditionMethods.DrawEditPoints(bitmap, editPoints);
                 }
             }
         }
@@ -522,78 +525,39 @@ namespace CG_Project_3
             }
         }
 
-
-        // ----------------------- Moving Shapes -----------------------
-        private void UpdatePolygon(Polygon s)
+        private void DrawCapsule(MouseButtonEventArgs e)
         {
-            s.AllPixels.Clear();
-            foreach (PixelPoint pp in s.Vertices)
+            int x = (int)Math.Round(e.GetPosition(Image).X);
+            int y = (int)Math.Round(e.GetPosition(Image).Y);
+            if (firstClick && !capsuleDrawing)
             {
-                if (s.Vertices.IndexOf(pp) == s.Vertices.Count - 1)
-                {
-                    if (AntiAliasing.IsChecked == true)
-                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.GuptaSproull(pp.X, pp.Y, s.Vertices[0].X, s.Vertices[0].Y, s.shapeColor, (double)s.GetThickness())).ToList();
-                    else
-                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.lineDDA(pp.X, pp.Y, s.Vertices[0].X, s.Vertices[0].Y, s.shapeColor, s.GetThickness())).ToList();
-                }
-                else
-                {
-                    int idx = s.Vertices.IndexOf(pp);
-                    if (AntiAliasing.IsChecked == true)
-                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.GuptaSproull(pp.X, pp.Y, s.Vertices.ElementAt(idx + 1).X,
-                        s.Vertices.ElementAt(idx + 1).Y, s.shapeColor, (double)s.GetThickness())).ToList();
-                    else
-                        s.AllPixels = s.AllPixels.Union(DrawingAlgorithms.lineDDA(pp.X, pp.Y, s.Vertices.ElementAt(idx + 1).X,
-                        s.Vertices.ElementAt(idx + 1).Y, s.shapeColor, s.GetThickness())).ToList();
-                }
+                lastPosition.X = x;
+                lastPosition.Y = y;
+                capsuleDrawing = true;
             }
-        }
-
-        private void UpdateLine(Line s)
-        {
-            if (AntiAliasing.IsChecked == true)
-                s.AllPixels = DrawingAlgorithms.GuptaSproull(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, (double)s.GetThickness());
+            else if (firstClick && capsuleDrawing)
+            {
+                Colour c = new Colour(lineColor.R, lineColor.G, lineColor.B);
+                int radius = (int)Math.Round(Math.Sqrt(Math.Pow(lastPosition.X - x, 2) + Math.Pow(lastPosition.Y - y, 2)));
+                PixelPoint A = new PixelPoint((int)firstPosition.X, (int)firstPosition.Y, c);
+                PixelPoint B = new PixelPoint((int)lastPosition.X, (int)lastPosition.Y, c);
+                Capsule capsule = new Capsule(A, B, radius, c);
+                capsule.AllPixels = DrawingAlgorithms.Capsule(A.X, A.Y, B.X, B.Y, radius, c);
+                capsule.DrawPixels(bitmap);
+                shapes.Add(capsule);
+                firstClick = false;
+                capsuleDrawing = false;
+            }
             else
-                s.AllPixels = DrawingAlgorithms.lineDDA(s.Start.X, s.Start.Y, s.End.X, s.End.Y, s.shapeColor, s.GetThickness());
-        }
-
-        private void UpdateShapes()
-        {
-            foreach (Shape shape in shapes)
             {
-                if (shape is Circle) continue;
-                if (shape is Polygon) UpdatePolygon(shape as Polygon);
-                if (shape is Line) UpdateLine(shape as Line);
+                firstClick = true;
+                firstPosition.X = x;
+                firstPosition.Y = y;
             }
         }
 
-        private void AddEditPoint(PixelPoint pixel, int chunk)
-        {
-            int size = (chunk - 1) / 2;
-            for (int i = -size; i <= size; i++)
-            {
-                for (int j = -size; j <= size; j++)
-                {
-                    if (Math.Sqrt(Math.Pow(i, 2) + Math.Pow(j, 2)) < (double)size)
-                    {
-                        editPoints.Add(new PixelPoint(pixel.X + i, pixel.Y + j, pixel.MyColor));
-                    }
-                }
-            }
-        }
 
-        private bool isNearPoint(PixelPoint p1, int x, int y)
-        {
-            if (x > p1.X - 20 && x < p1.X + 20 && y > p1.Y - 20 && y < p1.Y + 20)
-                return true;
-            return false;
-        }
-
-        private double Distance(PixelPoint p1, int x, int y)
-        {
-            return Math.Sqrt(Math.Pow(p1.X - x, 2) + Math.Pow(p1.Y - y, 2));
-        }
-
+        // -------------------- Editing Shapes --------------------
         private bool FindSelectedPoint(MouseButtonEventArgs e)
         {
             int x = (int)Math.Round(e.GetPosition(Image).X);
@@ -604,19 +568,19 @@ namespace CG_Project_3
                 {
                     var s = shape as Line;
                     PixelPoint center = new PixelPoint((s.Start.X + s.End.X) / 2, (s.Start.Y + s.End.Y) / 2, s.shapeColor);
-                    if (isNearPoint(s.Start, x, y))
+                    if (EditionMethods.isNearPoint(s.Start, x, y))
                     {
                         lineEditMode = 0;
                         selectedShape = s;
                         return true;
                     }
-                    if (isNearPoint(center, x, y))
+                    if (EditionMethods.isNearPoint(center, x, y))
                     {
                         lineEditMode = 1;
                         selectedShape = s;
                         return true;
                     }
-                    if (isNearPoint(s.End, x, y))
+                    if (EditionMethods.isNearPoint(s.End, x, y))
                     {
                         lineEditMode = 2;
                         selectedShape = s;
@@ -628,7 +592,7 @@ namespace CG_Project_3
                     var s = shape as Polygon;
                     var (cx, cy) = s.Center();
                     PixelPoint center = new PixelPoint(cx, cy, editColor);
-                    if (isNearPoint(center, x, y))
+                    if (EditionMethods.isNearPoint(center, x, y))
                     {
                         polygonEditMode = 1;
                         selectedShape = s;
@@ -637,7 +601,7 @@ namespace CG_Project_3
                     foreach(PixelPoint v in s.Vertices)
                     {
                         int idx = s.Vertices.IndexOf(v);
-                        if (isNearPoint(v, x, y))
+                        if (EditionMethods.isNearPoint(v, x, y))
                         {
                             polygonEditMode = 0;
                             Index1 = s.Vertices.IndexOf(v);
@@ -649,7 +613,7 @@ namespace CG_Project_3
                             PixelPoint tmp;
                             if (idx == s.Vertices.Count - 1) tmp = new PixelPoint((v.X + s.Vertices[0].X) / 2, (v.Y + s.Vertices[0].Y) / 2, s.shapeColor);
                             else tmp = new PixelPoint((v.X + s.Vertices[idx + 1].X) / 2, (v.Y + s.Vertices[idx + 1].Y) / 2, s.shapeColor);
-                            if (isNearPoint(tmp, x, y))
+                            if (EditionMethods.isNearPoint(tmp, x, y))
                             {
                                 polygonEditMode = 2;
                                 Index1 = idx;
@@ -663,15 +627,45 @@ namespace CG_Project_3
                 else if (shape is Circle)
                 {
                     var s = shape as Circle;
-                    if (isNearPoint(s.Origin, x, y))
+                    if (EditionMethods.isNearPoint(s.Origin, x, y))
                     {
                         circlePointEdit = false;
                         selectedShape = s;
                         return true;
                     }
-                    if (Distance(s.Origin, x, y) > s.Radius - 10 && Distance(s.Origin, x, y) < s.Radius + 10)
+                    if (EditionMethods.Distance(s.Origin, x, y) > s.Radius - 10 && EditionMethods.Distance(s.Origin, x, y) < s.Radius + 10)
                     {
                         circlePointEdit = true;
+                        selectedShape = s;
+                        return true;
+                    }
+                }
+                else if (shape is Capsule)
+                {
+                    var s = shape as Capsule;
+                    PixelPoint center = new PixelPoint((s.OriginA.X + s.OriginB.X) / 2, (s.OriginA.Y + s.OriginB.Y) / 2, s.shapeColor);
+                    if (EditionMethods.isNearPoint(s.OriginA, x, y))
+                    {
+                        capsuleEditMode = 0;
+                        selectedShape = s;
+                        return true;
+                    }
+                    if (EditionMethods.isNearPoint(center, x, y))
+                    {
+                        capsuleEditMode = 1;
+                        selectedShape = s;
+                        return true;
+                    }
+                    if (EditionMethods.isNearPoint(s.OriginB, x, y))
+                    {
+                        capsuleEditMode = 2;
+                        selectedShape = s;
+                        return true;
+                    }
+                    if (EditionMethods.Distance(s.OriginA, x, y) > s.Radius - 10 && EditionMethods.Distance(s.OriginA, x, y) < s.Radius + 10 ||
+                        EditionMethods.Distance(s.OriginB, x, y) > s.Radius - 10 && EditionMethods.Distance(s.OriginB, x, y) < s.Radius + 10)
+                    {
+                        capsuleEditMode = 3;
                         selectedShape = s;
                         return true;
                     }
@@ -680,151 +674,12 @@ namespace CG_Project_3
             return false;
         }
 
-        private void FindEditPoints()
-        {
-            foreach(Shape shape in shapes)
-            {
-                if (shape is Circle)
-                {
-                    var s = shape as Circle;
-                    PixelPoint tmp = new PixelPoint(s.Origin.X, s.Origin.Y, editColor);
-                    editPoints.Add(tmp);
-                    AddEditPoint(tmp, 21);
-                }
-                else if (shape is Polygon)
-                {
-                    var s = shape as Polygon;
-                    var (x, y) = s.Center();
-                    PixelPoint pp = new PixelPoint(x, y, editColor);
-                    editPoints.Add(pp);
-                    AddEditPoint(pp, 21);
-                    foreach (PixelPoint v in s.Vertices)
-                    {
-                        int idx = s.Vertices.IndexOf(v);
-                        PixelPoint edgeCenter;
-                        if (idx == s.Vertices.Count - 1) edgeCenter = new PixelPoint((v.X + s.Vertices[0].X) / 2, (v.Y + s.Vertices[0].Y) / 2, editColor);
-                        else edgeCenter = new PixelPoint((v.X + s.Vertices[idx + 1].X) /2, (v.Y + s.Vertices[idx + 1].Y) / 2, editColor);
-                        editPoints.Add(edgeCenter);
-                        AddEditPoint(edgeCenter, 21);
-                        PixelPoint vertex = new PixelPoint(v.X, v.Y, editColor);
-                        editPoints.Add(vertex);
-                        AddEditPoint(vertex, 21);
-                    }
-                }
-                else if (shape is Line)
-                {
-                    var s = shape as Line;
-                    PixelPoint p1 = new PixelPoint(s.Start.X, s.Start.Y, editColor);
-                    PixelPoint p2 = new PixelPoint(s.End.X, s.End.Y, editColor);
-                    PixelPoint center = new PixelPoint((s.Start.X + s.End.X) / 2, (s.Start.Y + s.End.Y) / 2, editColor);
-                    editPoints.Add(p1);
-                    AddEditPoint(p1, 21);
-                    editPoints.Add(p2);
-                    AddEditPoint(p2, 21);
-                    editPoints.Add(center);
-                    AddEditPoint(center, 21);
-                }
-            }
-        }
-
-        private void DrawEditPoints()
-        {
-            try
-            {
-                bitmap.Lock();
-                foreach (PixelPoint pp in editPoints)
-                {
-                    int column = pp.X;
-                    int row = pp.Y;
-                    if (row >= 0 && column >= 0 && row < ((int)bitmap.PixelHeight - 1) && column < (int)bitmap.PixelWidth - 1)
-                    {
-                        unsafe
-                        {
-                            IntPtr pBackBuffer = bitmap.BackBuffer;
-                            pBackBuffer += row * bitmap.BackBufferStride;
-                            pBackBuffer += column * 4;
-
-                            int color_data = 0;
-                            color_data |= 255 << 24;           // A
-                            color_data |= pp.MyColor.R << 16;  // R
-                            color_data |= pp.MyColor.G << 8;   // G
-                            color_data |= pp.MyColor.B << 0;   // B
-
-                            *((int*)pBackBuffer) = color_data;
-                        }
-                        bitmap.AddDirtyRect(new Int32Rect(column, row, 1, 1));
-                    }
-                }
-            }
-            finally
-            {
-                bitmap.Unlock();
-            }
-        }
-       
-
-        // --------------------- Deleting Shapes ----------------------
-        private void FindDeletePoints()
-        {
-            foreach (Shape shape in shapes)
-            {
-                if (shape is Circle)
-                {
-                    var s = shape as Circle;
-                    PixelPoint tmp = new PixelPoint(s.Origin.X, s.Origin.Y, editColor);
-                    editPoints.Add(tmp);
-                    AddEditPoint(tmp, 21);
-                }
-                else if (shape is Polygon)
-                {
-                    var s = shape as Polygon;
-                    var (x, y) = s.Center();
-                    PixelPoint pp = new PixelPoint(x, y, editColor);
-                    editPoints.Add(pp);
-                    AddEditPoint(pp, 21);
-                }
-                else if (shape is Line)
-                {
-                    var s = shape as Line;
-                    int x = (s.Start.X + s.End.X) / 2;
-                    int y = (s.Start.Y + s.End.Y) / 2;
-                    PixelPoint p1 = new PixelPoint(x, y, editColor);
-                    editPoints.Add(p1);
-                    AddEditPoint(p1, 21);
-                }
-            }
-        }
-
-        private Shape GetClickedShape(MouseButtonEventArgs e)
+        // ------------------ Edit Color/Thickness, Delete ----------------
+        private void DeleteShape(MouseButtonEventArgs e)
         {
             int x = (int)Math.Round(e.GetPosition(Image).X);
             int y = (int)Math.Round(e.GetPosition(Image).Y);
-            foreach (Shape shape in shapes)
-            {
-                if (shape is Circle)
-                {
-                    var s = shape as Circle;
-                    if (isNearPoint(s.Origin, x, y)) return s;
-                }
-                else if (shape is Polygon)
-                {
-                    var s = shape as Polygon;
-                    var (cx, cy) = s.Center();
-                    if (isNearPoint(new PixelPoint(cx, cy, s.shapeColor), x, y)) return s;
-                }
-                else if (shape is Line)
-                {
-                    var s = shape as Line;
-                    PixelPoint pp = new PixelPoint((s.Start.X + s.End.X) / 2, (s.Start.Y + s.End.Y) / 2, s.shapeColor);
-                    if (isNearPoint(pp, x, y)) return s;
-                }
-            }
-            return null;
-        }
-
-        private void DeleteShape(MouseButtonEventArgs e)
-        {
-            Shape toDelete = GetClickedShape(e);
+            Shape toDelete = EditionMethods.GetClickedShape(shapes, x, y);
             if (toDelete != null)
             {
                 shapes.Remove(toDelete);
@@ -834,7 +689,9 @@ namespace CG_Project_3
 
         private void ChangeColorThickness(MouseButtonEventArgs e, bool color)
         {
-            Shape thick = GetClickedShape(e);
+            int x = (int)Math.Round(e.GetPosition(Image).X);
+            int y = (int)Math.Round(e.GetPosition(Image).Y);
+            Shape thick = EditionMethods.GetClickedShape(shapes, x, y);
             if (thick != null)
             {
                 if (color == true)
@@ -847,17 +704,25 @@ namespace CG_Project_3
                     int t = Convert.ToInt32(ThicknessComboBox.Text.ToString());
                     thick.SetThickness(t);
                 }
-                if (thick is Line) UpdateLine(thick as Line);
-                if (thick is Polygon) UpdatePolygon(thick as Polygon);
-                if (thick is Circle)
+                if (thick is Line) EditionMethods.UpdateLine(thick as Line, AntiAliasing.IsChecked == true);
+                else if (thick is Polygon) EditionMethods.UpdatePolygon(thick as Polygon, AntiAliasing.IsChecked == true);
+                else if (thick is Circle)
                 {
                     if (color == false) return;
                     var s = thick as Circle;
                     s.AllPixels = DrawingAlgorithms.MidpointCircle(s.Origin.X, s.Origin.Y, s.Radius, s.shapeColor);
                 }
+                else if (thick is Capsule)
+                {
+                    if (color == false) return;
+                    var s = thick as Capsule;
+                    s.AllPixels = DrawingAlgorithms.Capsule(s.OriginA.X, s.OriginA.Y, s.OriginB.X, s.OriginB.Y, s.Radius, s.shapeColor);
+                }
                 RedrawImage();
             }
         }
+
+
 
     }
 }

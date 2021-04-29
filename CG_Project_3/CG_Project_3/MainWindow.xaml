@@ -54,6 +54,7 @@
                 <ComboBoxItem Name="Lines" Content="Line" IsSelected="True"/>
                 <ComboBoxItem Name="Polygons" Content="Polygon" />
                 <ComboBoxItem Name="Circles" Content="Circle" />
+                <ComboBoxItem Name="Capsules" Content="Capsule"/>
             </ComboBox>
             <DockPanel Grid.Row="2" Margin="5,0,5,0">
                 <TextBlock x:Name="ThickLabel" Text="Thickness" VerticalAlignment="Center" HorizontalAlignment="Left"/>

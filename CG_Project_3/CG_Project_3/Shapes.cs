@@ -69,6 +69,7 @@ namespace CG_Project_3
                 {
                     int column = pp.X;
                     int row = pp.Y;
+                    Colour p = pp.MyColor;
                     if (row >= 0 && column >= 0 && row < ((int)bmp.PixelHeight - 1) && column < (int)bmp.PixelWidth - 1)
                     {
                         unsafe
@@ -175,8 +176,24 @@ namespace CG_Project_3
             sum_y /= Vertices.Count();
             return (sum_x, sum_y);
         }
+    }
 
-        
+    [Serializable]
+    public class Capsule : Shape
+    {
+        public PixelPoint OriginA { get; set; }
+        public PixelPoint OriginB { get; set; }
+        public int Radius { get; set; }
+
+        public Capsule(PixelPoint A, PixelPoint B, int R, Colour colour)
+        {
+            this.OriginA = A;
+            this.OriginB = B;
+            this.Radius = R;
+            this.shapeColor = colour;
+            this.thickness = -1;
+            this.AllPixels = null;
+        }
     }
 
 

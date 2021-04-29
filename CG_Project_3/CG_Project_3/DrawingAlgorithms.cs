@@ -34,7 +34,7 @@ namespace CG_Project_3
                     y += my;
                     _y = (int)y;
 
-                    var line = DrawingAlgorithms.CopyPixels(_x, _y, color, brushSize, dx, dy);
+                    var line = CopyPixels(_x, _y, color, brushSize, dx, dy);
                     foreach (var p in line)
                         result.Add(p);
                 }
@@ -119,14 +119,14 @@ namespace CG_Project_3
         {
             if (w >= r)
             {
-                if (w <= D) return DrawingAlgorithms.cov(D - w, r);
-                else if (0 <= D && D <= w) return 1 - DrawingAlgorithms.cov(w - D, r);
+                if (w <= D) return cov(D - w, r);
+                else if (0 <= D && D <= w) return 1 - cov(w - D, r);
             }
             else
             {
-                if (0 <= D && D <= w) return 1 - DrawingAlgorithms.cov(w - D, r) - DrawingAlgorithms.cov(w + D, r);
-                else if (w <= D && D <= r - w) return DrawingAlgorithms.cov(D - w, r) - DrawingAlgorithms.cov(D + w, r);
-                else if (r - w <= D && D <= r + w) return DrawingAlgorithms.cov(D - w, r);
+                if (0 <= D && D <= w) return 1 - cov(w - D, r) - cov(w + D, r);
+                else if (w <= D && D <= r - w) return cov(D - w, r) - cov(D + w, r);
+                else if (r - w <= D && D <= r + w) return cov(D - w, r);
             }
             return 0;
         }
@@ -134,13 +134,13 @@ namespace CG_Project_3
         public static double IntensifyPixel(List<PixelPoint> pixels, int x, int y, double thickness, double distance, Colour lineColor)
         {
             double r = 0.5;
-            double cov = DrawingAlgorithms.Coverage(thickness, distance, r);
+            double cov = Coverage(thickness, distance, r);
 
             if (cov > 0)
             {
-                byte R = (byte)DrawingAlgorithms.Lerp(255, lineColor.R, cov);
-                byte G = (byte)DrawingAlgorithms.Lerp(255, lineColor.G, cov);
-                byte B = (byte)DrawingAlgorithms.Lerp(255, lineColor.B, cov);
+                byte R = (byte)Lerp(255, lineColor.R, cov);
+                byte G = (byte)Lerp(255, lineColor.G, cov);
+                byte B = (byte)Lerp(255, lineColor.B, cov);
                 pixels.Add(new PixelPoint(x, y, new Colour(R, G, B)));
             }
             return cov;
@@ -149,8 +149,8 @@ namespace CG_Project_3
         private static void CopyPixelsAA(List<PixelPoint> pixels, int x, int y, double thickness, Colour c, double d_invDenom, double v_d, int dx, int dy)
         {
             pixels.Add(new PixelPoint(x, y, c));
-            for (int i = 1; DrawingAlgorithms.IntensifyPixel(pixels, x + i * dx, y + i * dy, thickness, i * d_invDenom - v_d, c) > 0; ++i) ;
-            for (int i = 1; DrawingAlgorithms.IntensifyPixel(pixels, x - i * dx, y - i * dy, thickness, i * d_invDenom + v_d, c) > 0; ++i) ;
+            for (int i = 1; IntensifyPixel(pixels, x + i * dx, y + i * dy, thickness, i * d_invDenom - v_d, c) > 0; ++i) ;
+            for (int i = 1; IntensifyPixel(pixels, x - i * dx, y - i * dy, thickness, i * d_invDenom + v_d, c) > 0; ++i) ;
         }
 
         public static List<PixelPoint> GuptaSproull(int x1, int y1, int x2, int y2, Colour color, double thickness)
@@ -188,8 +188,8 @@ namespace CG_Project_3
 
             int delta = 1;
             if (y2 - y1 < 0) delta = -1;
-            DrawingAlgorithms.CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, delta);
-            DrawingAlgorithms.CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, -delta);
+            CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, delta);
+            CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, -delta);
             while (xStart < xEnd)
             {
                 xStart += 1;
@@ -206,8 +206,8 @@ namespace CG_Project_3
                     yStart += delta;
                     yEnd -= delta;
                 }
-                DrawingAlgorithms.CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, delta);
-                DrawingAlgorithms.CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, -delta);
+                CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, delta);
+                CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dx * invDenom, 0, -delta);
             }
             return result;
         }
@@ -229,8 +229,8 @@ namespace CG_Project_3
 
             int delta = 1;
             if (y2 - y1 < 0) delta = -1;
-            DrawingAlgorithms.CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, 1, 0);
-            DrawingAlgorithms.CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, -1, 0);
+            CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, 1, 0);
+            CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, -1, 0);
             while (delta * (yStart - yEnd) < 0)
             {
                 yStart += delta;
@@ -247,12 +247,77 @@ namespace CG_Project_3
                     xStart += 1;
                     xEnd -= 1;
                 }
-                DrawingAlgorithms.CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, 1, 0); ;
-                DrawingAlgorithms.CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, -1, 0);
+                CopyPixelsAA(result, xStart, yStart, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, 1, 0); ;
+                CopyPixelsAA(result, xEnd, yEnd, thickness / 2, color, two_dy_invDenom, two_v_dy * invDenom, -1, 0);
             }
             return result;
         }
 
-        
+
+        // ------------------- Capsule -------------------
+        private static int Sign(int Dx, int Dy, int Ex, int Ey, int Fx, int Fy)
+        {
+            return Math.Sign((Ex - Dx) * (Fy - Dy) - (Ey - Dy) * (Fx - Dx));
+        }
+
+        public static List<PixelPoint> Capsule(int x1, int y1, int x2, int y2, int radius, Colour color)
+        {
+            List<PixelPoint> result = new List<PixelPoint>();
+            int length = (int)Math.Round(Math.Sqrt(Math.Pow(x2 - x1, 2) + Math.Pow(y2 - y1, 2)));
+            int Wx = (int)Math.Round(((double)(y2 - y1) / length) * radius);
+            int Wy = (int)Math.Round(((double)(x2 - x1) / length) * radius) * -1;
+
+            result = result.Union(lineDDA(x1 + Wx, y1 + Wy, x2 + Wx, y2 + Wy, color, 1)).ToList();
+            result = result.Union(lineDDA(x1 - Wx, y1 - Wy, x2 - Wx, y2 - Wy, color, 1)).ToList();
+            result = result.Union(CapsuleCircle(x1, y1, x1 + Wx, y1 + Wy, radius, color, false)).ToList();
+            result = result.Union(CapsuleCircle(x2, y2, x2 + Wx, y2 + Wy, radius, color, true)).ToList();
+            return result;
+        }
+
+        public static List<PixelPoint> CapsuleCircle(int Cx, int Cy, int Ex, int Ey, int R, Colour color, bool side)
+        {
+            List<PixelPoint> result = new List<PixelPoint>();
+            int d = 1 - R;
+            int x = 0;
+            int y = R;
+
+            while (y > x)
+            {
+                if (d < 0)
+                    d += (2 * x) + 3;
+                else
+                {
+                    d += (2 * x) - (2 * y) + 5;
+                    --y;
+                }
+                ++x;
+                if (side)
+                {
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + x, Cy + y) >= 0) result.Add(new PixelPoint(Cx + x, Cy + y, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + x, Cy - y) >= 0) result.Add(new PixelPoint(Cx + x, Cy - y, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - x, Cy + y) >= 0) result.Add(new PixelPoint(Cx - x, Cy + y, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - x, Cy - y) >= 0) result.Add(new PixelPoint(Cx - x, Cy - y, color));
+
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + y, Cy + x) >= 0) result.Add(new PixelPoint(Cx + y, Cy + x, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + y, Cy - x) >= 0) result.Add(new PixelPoint(Cx + y, Cy - x, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - y, Cy + x) >= 0) result.Add(new PixelPoint(Cx - y, Cy + x, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - y, Cy - x) >= 0) result.Add(new PixelPoint(Cx - y, Cy - x, color));
+                }
+                else
+                {
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + x, Cy + y) <= 0) result.Add(new PixelPoint(Cx + x, Cy + y, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + x, Cy - y) <= 0) result.Add(new PixelPoint(Cx + x, Cy - y, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - x, Cy + y) <= 0) result.Add(new PixelPoint(Cx - x, Cy + y, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - x, Cy - y) <= 0) result.Add(new PixelPoint(Cx - x, Cy - y, color));
+
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + y, Cy + x) <= 0) result.Add(new PixelPoint(Cx + y, Cy + x, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx + y, Cy - x) <= 0) result.Add(new PixelPoint(Cx + y, Cy - x, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - y, Cy + x) <= 0) result.Add(new PixelPoint(Cx - y, Cy + x, color));
+                    if (Sign(Cx, Cy, Ex, Ey, Cx - y, Cy - x) <= 0) result.Add(new PixelPoint(Cx - y, Cy - x, color));
+                }
+            }
+            return result;
+        }
+
     }
 }

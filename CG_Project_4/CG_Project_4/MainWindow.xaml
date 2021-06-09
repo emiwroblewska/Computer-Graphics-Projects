@@ -1,0 +1,112 @@
+﻿<Window x:Class="CG_Project_4.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CG_Project_4"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="CG Project 4" Height="640" Width="800" MinHeight="640" MinWidth="200" SizeChanged="Window_Size_Changed" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="{x:Type RadioButton}">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="5,0,0,0"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+    </Window.Resources>
+    <Grid x:Name="myGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="120"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
+            <Menu DockPanel.Dock="Top" Background="#ccd9ff">
+                <MenuItem Header="_Options" Height="25">
+                    <MenuItem Header="_Load" Click="Load_Click"/>
+                    <MenuItem Header="_Save" Click="Save_Click"/>
+                    <MenuItem Header="_Clear Canvas" Click="Clear_Click"/>
+                    <Separator />
+                    <MenuItem Header="_Exit" Click="Menu_Exit_Click"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+
+        <Image Grid.Column="0" Grid.Row="1" Name="Image" Stretch="None" MouseDown="Image_MouseDown" 
+               MouseMove="Image_MouseMove" MouseUp="Image_MouseUp" MouseLeave="Image_MouseLeave"/>
+
+        <Grid Grid.Column="1" Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Drawing</Label>
+            <ComboBox x:Name="shapeComboBox" Grid.Row="1" HorizontalContentAlignment="Center"  VerticalContentAlignment="Center" 
+                      VerticalAlignment="Center" Width="100" Height="25" SelectionChanged="ComboBox_SelectionChanged">
+                <ComboBoxItem Name="Lines" Content="Line" IsSelected="True"/>
+                <ComboBoxItem Name="Polygons" Content="Polygon" />
+                <ComboBoxItem Name="Rectangles" Content="Rectangle"/>
+                <ComboBoxItem Name="Circles" Content="Circle" />
+            </ComboBox>
+            <DockPanel Grid.Row="2" Margin="5,0,5,0">
+                <TextBlock x:Name="ThickLabel" Text="Thickness" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <ComboBox x:Name="ThicknessComboBox" VerticalAlignment="Center" HorizontalAlignment="Right" Width="50"/>
+            </DockPanel>
+            <DockPanel Grid.Row="3" Margin="5,0,5,0">
+                <TextBlock Text="Line Color" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <xctk:ColorPicker Name="ColorPicker" VerticalAlignment="Center" HorizontalAlignment="Right" SelectedColorChanged="Selected_Color_Changed" 
+                                  AvailableColorsSortingMode="HueSaturationBrightness" SelectedColor="Black" Width="50"/>
+            </DockPanel>
+            <CheckBox Grid.Row="4" Name="AntiAliasing" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"
+                      Checked="Anti_Aliasing_Changed" Unchecked="Anti_Aliasing_Changed">Anti-Aliasing</CheckBox>
+
+            <Label Grid.Row="5" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">Modes</Label>
+            <RadioButton Grid.Row="6" Name="DrawButton" Checked="Draw_Mode_Checked" IsChecked="True">Draw</RadioButton>
+            <RadioButton Grid.Row="7" Name="EditButton" Checked="Edit_Mode_Checked">Edit shapes</RadioButton>
+            <RadioButton Grid.Row="8" Name="ThickButton" Checked="Thick_Mode_Checked">Edit thickness</RadioButton>
+            <RadioButton Grid.Row="9" Name="ColorButton" Checked="Color_Mode_Checked">Edit color</RadioButton>
+            <RadioButton Grid.Row="10" Name="DeleteButton" Checked="Delete_Mode_Checked">Delete</RadioButton>
+            <RadioButton Grid.Row="11" Name="ClipButton" Checked="Clip_Mode_Checked">Clip</RadioButton>
+            <RadioButton Grid.Row="12" Name="FillButton" Checked="Fill_Mode_Checked" Unchecked="Fill_Mode_Unchecked">Fill Polygon</RadioButton>
+            
+            <DockPanel Grid.Row="13" Margin="5,0,5,0">
+                <TextBlock Text="Fill Color" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="5,0,0,0"/>
+                <xctk:ColorPicker Name="FillColorPicker" VerticalAlignment="Center" HorizontalAlignment="Right" SelectedColorChanged="Selected_FillColor_Changed" 
+                                AvailableColorsSortingMode="HueSaturationBrightness" SelectedColor="Black" Width="50"/>
+            </DockPanel>
+            <CheckBox Grid.Row="14" Name="PatternCheckBox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"
+                        Checked="Fill_Pattern_Checked" Unchecked="Fill_Pattern_Checked" IsEnabled="False">Use pattern</CheckBox>
+            <CheckBox Grid.Row="15" Name="FloodCheckBox" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0"
+                      IsEnabled="False">Flood Fill</CheckBox>
+            <Button Grid.Row="16" Name="PatternButton"  Margin="10,5,10,5" Click="Pattern_Button_Click" IsEnabled="False">Choose pattern</Button>
+            <Border Grid.Row="17" Margin="10,5,10,5" BorderBrush="Black" BorderThickness="1">
+                <Image Name="PatternImage" MaxHeight="80" Width="100"/>
+            </Border>
+
+            <RadioButton Grid.Row="18" Name="UnfillButton" Checked="Unfill_Mode_Checked">Unfill Polygon</RadioButton>
+        </Grid>
+        <GridSplitter Grid.Column="0" Grid.Row="1" Width="1" Background="Black" IsEnabled="False"/>
+    </Grid>
+</Window>

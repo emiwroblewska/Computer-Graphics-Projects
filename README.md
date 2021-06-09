@@ -6,3 +6,4 @@ Each application is implemented using WPF technology.
 - Project 2 - Project 1 application extended by Dithering and Color Quantization
 - Project 3 - Rasterization (drawing shapes pixel by pixel with chosen algorithms)
 - Project 4 - Project 3 application extended by Clipping and Filling algorithms
+- Project 5 - 3D Graphics (Cylinder with Phong Shading)

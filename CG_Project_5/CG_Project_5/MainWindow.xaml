@@ -23,7 +23,7 @@
             <ColumnDefinition Width="600"/>
             <ColumnDefinition Width="250"/>
         </Grid.ColumnDefinitions>
-        <!--<Canvas Grid.Column="0" Name="MainImage" Height="650" Width="750" ClipToBounds="True">
+        <!--<Canvas Grid.Column="0" Name="Scene" Height="600" Width="600" ClipToBounds="True">
             <Canvas.Background>
                 <SolidColorBrush Color="White" Opacity="0"/>
             </Canvas.Background>
@@ -54,7 +54,7 @@
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" >N</Label>
-                    <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="Nslider" Minimum="10" Maximum="80" Value="30"
+                    <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="Nslider" Minimum="10" Maximum="80" Value="15"
                             ValueChanged="Nslider_ValueChanged"></Slider>
                     <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Height</Label>
                     <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="HeightSlider" Minimum="10" Maximum="150" Value="50"
@@ -104,11 +104,11 @@
                         <RowDefinition Height="30"/>
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Width/2</Label>
+                    <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Width / 2</Label>
                     <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="SxSlider" Minimum="0" Maximum="600" Value="300"
                             ValueChanged="SxSlider_ValueChanged"/>
-                    <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Height/2</Label>
-                    <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="SySlider" Minimum="0" Maximum="600" Value="200"
+                    <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Height / 2</Label>
+                    <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="SySlider" Minimum="0" Maximum="600" Value="300"
                             ValueChanged="SySlider_ValueChanged"/>
                 </Grid>
             </GroupBox>
@@ -154,13 +154,13 @@
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Light X</Label>
-                    <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="LightXslider" Minimum="0" Maximum="800" Value="200"
+                    <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="LightXslider" Minimum="-200" Maximum="200" Value="0"
                             ValueChanged="LightXslider_ValueChanged"/>
                     <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Light Y</Label>
-                    <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="LightYslider" Minimum="0" Maximum="600" Value="0"
+                    <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="LightYslider" Minimum="-200" Maximum="200" Value="25"
                             ValueChanged="LightYslider_ValueChanged"/>
                     <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Light Z</Label>
-                    <Slider Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Name="LightZslider" Minimum="0" Maximum="800" Value="0" 
+                    <Slider Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Name="LightZslider" Minimum="-100" Maximum="100" Value="0" 
                             ValueChanged="LightZslider_ValueChanged"/>
                 </Grid>
             </GroupBox>

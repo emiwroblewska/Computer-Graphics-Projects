@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows;
@@ -26,7 +25,21 @@ namespace CG_Project_5
             W = w;
         }
     }
-   
+
+    public class Pixel
+    {
+        public int X;
+        public int Y;
+        public Color color;
+
+        public Pixel(int x, int y, Color c)
+        {
+            X = x;
+            Y = y;
+            color = c;
+        }
+    }
+
 
     public static class Drawing
     {
@@ -41,39 +54,14 @@ namespace CG_Project_5
             return p2;
         }
 
-        public static List<System.Drawing.Point> lineDDA(WriteableBitmap bitmap, int x1, int y1, int x2, int y2, System.Windows.Media.Color color)
-        {
-            List<System.Drawing.Point> result = new List<System.Drawing.Point>();
-            int steps, k, _x, _y;
-            float mx, my, x, y;
-            int dx = x2 - x1;
-            int dy = y2 - y1;
-
-            if (Math.Abs(dx) > Math.Abs(dy)) steps = Math.Abs(dx);
-            else steps = Math.Abs(dy);
-
-            mx = dx / (float)steps;
-            my = dy / (float)steps;
-            x = x1;
-            y = y1;
-            
-            for (k = 0; k < steps; k++)
-            {
-                x += mx;
-                _x = (int)x;
-                y += my;
-                _y = (int)y;
-                DrawPixel(bitmap, _x, _y, color);
-                result.Add(new System.Drawing.Point(_x, _y));
-            }
-            return result;
-        }
+       
 
         
 
-        public static void FillTriangle(WriteableBitmap bmp, List<Point4> vertices, System.Windows.Media.Color color)
+        public static void FillTriangle(WriteableBitmap bmp, List<Point4> vertices, Color color, List<Pixel> result)
         {
             int N = vertices.Count();
+            //List<Pixel> result = new List<Pixel>();
             List<(int, double, double)> AET = new List<(int, double, double)>();
             var P = vertices;
             var P1 = P.OrderBy(p => p.Y).ToList();
@@ -83,8 +71,9 @@ namespace CG_Project_5
             int k = 0;
             int i = indices[k];
             int y, ymin, ymax;
-            y = ymin = (int)(P[indices[0]].Y);
-            ymax = (int)(P[indices[N - 1]].Y);
+            y = ymin = (int)Math.Round(P[indices[0]].Y);
+            ymax = (int)Math.Round(P[indices[N - 1]].Y);
+            //bmp.Lock();
             while (y < ymax)
             {
                 while ((int)P[i].Y == y)
@@ -137,7 +126,11 @@ namespace CG_Project_5
                     {
                         for (int x = (int)AET[j].Item2; x <= (int)AET[j + 1].Item2; x++)
                         {
-                            DrawPixel(bmp, x, y, color);
+                            if (x > 0 && y > 0 && x < bmp.PixelWidth && y < bmp.PixelHeight)
+                            {
+                                result.Add(new Pixel(x, y, color));
+                            }
+                            
                         }
                     }
                 }
@@ -148,35 +141,63 @@ namespace CG_Project_5
                 for (int j = 0; j < AET.Count; j++)
                     AET[j] = (AET[j].Item1, AET[j].Item2 + AET[j].Item3, AET[j].Item3);
             }
+            //bmp.Unlock();
+            //return result;
         }
 
-        internal static void DrawPixel(WriteableBitmap bmp, int x, int y, System.Windows.Media.Color color)
+        public static void DrawPixel(WriteableBitmap bmp, int x, int y, System.Windows.Media.Color color)
         {
             if (x < 0 || y < 0 || x >= bmp.PixelWidth || y >= bmp.PixelHeight)
                 return;
+            unsafe
+            {
+                IntPtr pBackBuffer = bmp.BackBuffer + y * bmp.BackBufferStride + x * 4;
+
+                int color_data = 0;
+                color_data |= color.A << 24;    // A
+                color_data |= color.R << 16;    // R
+                color_data |= color.G << 8;     // G
+                color_data |= color.B << 0;     // B
+
+                *((int*)pBackBuffer) = color_data;
+            }
+            bmp.AddDirtyRect(new Int32Rect(x, y, 1, 1));
+        }
+
+        public static void DrawPixels(WriteableBitmap bmp, List<Pixel> pixels)
+        {
             try
             {
                 bmp.Lock();
-                unsafe
+                foreach (Pixel pp in pixels)
                 {
-                    IntPtr pBackBuffer = bmp.BackBuffer + y * bmp.BackBufferStride + x * 4;
+                    int column = pp.X;
+                    int row = pp.Y;
+                    if (row >= 0 && column >= 0 && row < ((int)bmp.PixelHeight - 1) && column < (int)bmp.PixelWidth - 1)
+                    {
+                        unsafe
+                        {
+                            IntPtr pBackBuffer = bmp.BackBuffer;
+                            pBackBuffer += row * bmp.BackBufferStride;
+                            pBackBuffer += column * 4;
 
-                    int color_data = 0;
-                    color_data |= color.A << 24;    // A
-                    color_data |= color.R << 16;    // R
-                    color_data |= color.G << 8;     // G
-                    color_data |= color.B << 0;     // B
+                            int color_data = 0;
+                            color_data |= pp.color.A << 24;           // A
+                            color_data |= pp.color.R << 16;  // R
+                            color_data |= pp.color.G << 8;   // G
+                            color_data |= pp.color.B << 0;   // B
 
-                    *((int*)pBackBuffer) = color_data;
+                            *((int*)pBackBuffer) = color_data;
+                        }
+                        bmp.AddDirtyRect(new Int32Rect(column, row, 1, 1));
+                    }
                 }
-                bmp.AddDirtyRect(new Int32Rect(x, y, 1, 1));
             }
             finally
             {
                 bmp.Unlock();
             }
         }
-
 
     }
 }

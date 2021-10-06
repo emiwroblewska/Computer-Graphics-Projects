@@ -13,7 +13,7 @@
             <Setter Property="FontSize" Value="12"/>
         </Style>
 
-        <Style TargetType="GroupBox">
+        <Style TargetType="{x:Type GroupBox}">
             <Setter Property="Margin" Value="0,0,20,0"/>
             <Setter Property="Padding" Value="0,5,0,0"/>
         </Style>
@@ -154,13 +154,13 @@
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Light X</Label>
-                    <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="LightXslider" Minimum="-200" Maximum="200" Value="0"
+                    <Slider Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="LightXslider" Minimum="-100" Maximum="100" Value="0"
                             ValueChanged="LightXslider_ValueChanged"/>
                     <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Light Y</Label>
                     <Slider Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="LightYslider" Minimum="-200" Maximum="200" Value="25"
                             ValueChanged="LightYslider_ValueChanged"/>
                     <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Light Z</Label>
-                    <Slider Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Name="LightZslider" Minimum="-100" Maximum="100" Value="0" 
+                    <Slider Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Name="LightZslider" Minimum="-50" Maximum="50" Value="0" 
                             ValueChanged="LightZslider_ValueChanged"/>
                 </Grid>
             </GroupBox>

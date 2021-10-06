@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Numerics;
 
 namespace CG_Project_5
@@ -29,15 +21,8 @@ namespace CG_Project_5
         private double lightY = 25;
         private double lightZ = 0;
         private Vector3 Light;
-        private Vector3 Ia;
-        private Vector3 ka;
-        private Vector3 ks;
-        private Vector3 kd;
-
-        //private List<System.Drawing.Point> allPoints = new List<System.Drawing.Point>();
+       
         private List<Pixel> drawPoints = new List<Pixel>();
-
-        //private Diamond diamond;
         private Cylinder cylinder;
         private Color lineColor = Colors.Gray;
         private Color fillColor = Colors.Gray;
@@ -45,13 +30,7 @@ namespace CG_Project_5
         public MainWindow()
         {
             InitializeComponent();
-            bitmap = new WriteableBitmap(
-               600,
-               600,
-               96,
-               96,
-               PixelFormats.Bgra32,
-               BitmapPalettes.Halftone256);
+            bitmap = new WriteableBitmap(600, 600, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
             angleX = angleY = angleZ = 0;
             cPosX = 0;
@@ -59,18 +38,13 @@ namespace CG_Project_5
             cPosZ = 200;
             sx = 300; sy = 300;
             Light = new Vector3((float)lightX, (float)lightY, (float)lightZ);
-            Ia = new Vector3(1, 1, 1);
-            ka = new Vector3(0.5f, 0.5f, 0.5f);
-            ks = new Vector3(0.75f, 0.75f, 0.75f);
-            kd = new Vector3(0.25f, 0.25f, 0.25f);
 
             cylinder = new Cylinder(10, 50, 20);
             cylinder.CreateCylinder();
             DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
         }
 
-       
-
+        //----------------- TRANSLATION -------------------
         public List<Tuple<Point4, Point4, Point4>> translate3Dto2D(List<(Point4, Point4)> vertices)
         {
             //Item1 - projection result, Item2 - normal vector, Item3 - global coordinates
@@ -78,19 +52,13 @@ namespace CG_Project_5
             double alfaX = Math.PI * angleX / 180.0;
             double alfaY = Math.PI * angleY / 180.0;
             double alfaZ = Math.PI * angleZ / 180.0;
-            //float sx = (float)Scene.Width / 2;
-            //float sy = (float)Scene.Height / 2;
             double theta = Math.PI / 8;
 
             Matrix4x4 P = new Matrix4x4(-sx / (float)Math.Tan(-theta), 0, sx, 0,
                                         0, sx / (float)Math.Tan(-theta), sy, 0,
                                         0, 0, 0, 1,
                                         0, 0, 1, 0);
-            //Matrix4x4 P = new Matrix4x4((float)(Scene.Height / Scene.Width), 0, 0, 0,
-            //                           0, 1, 0, 0,
-            //                           0, 0, 0, -1,
-            //                           0, 0, 1, 0);
-
+            
             Matrix4x4 Rx = new Matrix4x4(1, 0, 0, 0,
                                          0, (float)Math.Cos(alfaX), -(float)Math.Sin(alfaX), 0,
                                          0, (float)Math.Sin(alfaX), (float)Math.Cos(alfaX), 0,
@@ -109,9 +77,9 @@ namespace CG_Project_5
             Vector3 CameraPos = new Vector3(cPosX, cPosY, cPosZ);
             Vector3 CameraTarget = new Vector3(0, 0, 0);
             Vector3 CameraUp = new Vector3(0, 1, 0);
-            Vector3 cZ = Vector3.Normalize(Vector3.Subtract(CameraPos, CameraTarget)); //, Vector3.Subtract(CameraPos, CameraTarget).Length());
-            Vector3 cX = Vector3.Normalize(Vector3.Cross(CameraUp, cZ)); //, Vector3.Cross(CameraUp, cZ).Length());
-            Vector3 cY = Vector3.Normalize(Vector3.Cross(cZ, cX)); //, Vector3.Cross(cZ, cX).Length());Vector3.
+            Vector3 cZ = Vector3.Normalize(Vector3.Subtract(CameraPos, CameraTarget));
+            Vector3 cX = Vector3.Normalize(Vector3.Cross(CameraUp, cZ)); 
+            Vector3 cY = Vector3.Normalize(Vector3.Cross(cZ, cX)); 
 
             Matrix4x4 C = new Matrix4x4(cX.X, cX.Y, cX.Z, Vector3.Dot(cX, CameraPos),
                                         cY.X, cY.Y, cY.Z, Vector3.Dot(cY, CameraPos),
@@ -132,20 +100,15 @@ namespace CG_Project_5
                 y /= w;
                 z /= w;
                 w = 1;
-                //x = (int)Math.Floor((Scene.Width / 2) * (1 + x));
-                //y = (int)Math.Floor((Scene.Height / 2) * (1 - y));
-                //x = (int)Math.Floor(Scene.Width * (1 - (x / 600)));
-                //y = (int)Math.Floor(Scene.Height * (1 - (y / 600)));
                 result.Add(new Tuple<Point4, Point4, Point4>(new Point4(x, y, z, w), v.Item2, v.Item1));
             }
             return result;
         }
 
 
-        // ------------- DRAWING -------------
+        // ---------------- DRAWING ----------------
         public void lineDDA_3D(List<Pixel> result, Tuple<Point4, Point4, Point4> v1, Tuple<Point4, Point4, Point4> v2, Color color)
         {
-            //List<Pixel> result = new List<Pixel>();
             int x1 = (int)v1.Item1.X;
             int y1 = (int)v1.Item1.Y;
             int x2 = (int)v2.Item1.X;
@@ -193,15 +156,15 @@ namespace CG_Project_5
             {
                 tmp.Add(v.Item1);
             }
-            tmp.Sort((a, b) => a.Y.CompareTo(b.Y)); //a.compare to b
+            tmp.Sort((a, b) => a.Y.CompareTo(b.Y)); 
             for (int j = 0; j < tmp.Count; j++)
                 indices[j] = vert.IndexOf(vert.Find(x => x.Item1 == tmp[j]));
             List<Tuple<int, double, double>> AET = new List<Tuple<int, double, double>>();
             int k = 0;
             int i = indices[0];
             int y, ymin, ymax;
-            y = ymin = (int)vert[indices[0]].Item1.Y; //y,ymin
-            ymax = (int)vert[indices[vert.Count - 1]].Item1.Y; //ymax
+            y = ymin = (int)vert[indices[0]].Item1.Y; 
+            ymax = (int)vert[indices[vert.Count - 1]].Item1.Y; 
 
             while (y < ymax)
             {
@@ -211,28 +174,28 @@ namespace CG_Project_5
                     {
                         if (vert[i - 1].Item1.Y > vert[i].Item1.Y)
                             AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[i - 1].Item1.Y, vert[i].Item1.Y), 
-                                Low(vert[i - 1].Item1, vert[i].Item1).X, 
+                                Drawing.Low(vert[i - 1].Item1, vert[i].Item1).X, 
                                 (double)(vert[i - 1].Item1.X - vert[i].Item1.X) / (vert[i - 1].Item1.Y - vert[i].Item1.Y)));
                     }
                     else
                     {
                         if (vert[vert.Count - 1].Item1.Y > vert[i].Item1.Y)
-                            AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[vert.Count - 1].Item1.Y, vert[i].Item1.Y), 
-                                Low(vert[vert.Count - 1].Item1, vert[i].Item1).X,
+                            AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[vert.Count - 1].Item1.Y, vert[i].Item1.Y),
+                                Drawing.Low(vert[vert.Count - 1].Item1, vert[i].Item1).X,
                                 (double)(vert[vert.Count - 1].Item1.X - vert[i].Item1.X) / (vert[vert.Count - 1].Item1.Y - vert[i].Item1.Y)));
                     }
                     if (i < vert.Count - 1)
                     {
                         if (vert[i + 1].Item1.Y > vert[i].Item1.Y)
-                            AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[i + 1].Item1.Y, vert[i].Item1.Y), 
-                                Low(vert[i + 1].Item1, vert[i].Item1).X,
+                            AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[i + 1].Item1.Y, vert[i].Item1.Y),
+                                Drawing.Low(vert[i + 1].Item1, vert[i].Item1).X,
                                 (double)(vert[i + 1].Item1.X - vert[i].Item1.X) / (vert[i + 1].Item1.Y - vert[i].Item1.Y)));
                     }
                     else
                     {
                         if (vert[0].Item1.Y > vert[i].Item1.Y)
-                            AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[0].Item1.Y, vert[i].Item1.Y), 
-                                Low(vert[0].Item1, vert[i].Item1).X,
+                            AET.Add(new Tuple<int, double, double>((int)Math.Max(vert[0].Item1.Y, vert[i].Item1.Y),
+                                Drawing.Low(vert[0].Item1, vert[i].Item1).X,
                                 (double)(vert[0].Item1.X - vert[i].Item1.X) / (vert[0].Item1.Y - vert[i].Item1.Y)));
                     }
                     ++k;
@@ -261,8 +224,8 @@ namespace CG_Project_5
                         }
                         else
                         {
-                            pLeft = InterpolatePoint(new Point(xL, y), vert[indices[0]], LowerX(vert[indices[1]], vert[indices[2]])); //0,1,2
-                            pRight = InterpolatePoint(new Point(xR, y), vert[indices[0]], UpperX(vert[indices[1]], vert[indices[2]])); //0,1,2
+                            pLeft = InterpolatePoint(new Point(xL, y), vert[indices[0]], Drawing.LowerX(vert[indices[1]], vert[indices[2]])); //0,1,2
+                            pRight = InterpolatePoint(new Point(xR, y), vert[indices[0]], Drawing.UpperX(vert[indices[1]], vert[indices[2]])); //0,1,2
                         }
                         for (int x = (int)AET[j].Item2; x <= (int)AET[j + 1].Item2; x++)
                         {
@@ -279,30 +242,8 @@ namespace CG_Project_5
             }
         }
 
-        public Point4 Low(Point4 first, Point4 second)
-        {
-            if (first.Y < second.Y)
-                return first;
-            else
-                return second;
-        }
-
-        public Tuple<Point4, Point4, Point4> LowerX(Tuple<Point4, Point4, Point4> first, Tuple<Point4, Point4, Point4> second)
-        {
-            if (first.Item1.X < second.Item1.X)
-                return first;
-            else
-                return second;
-        }
-
-        public Tuple<Point4, Point4, Point4> UpperX(Tuple<Point4, Point4, Point4> first, Tuple<Point4, Point4, Point4> second)
-        {
-            if (first.Item1.X > second.Item1.X)
-                return first;
-            else
-                return second;
-        }
-
+        
+        //---------------- COLOR CALCULATION -------------
         public Tuple<Point4, Point4, Point4> InterpolatePoint(Point middleP, Tuple<Point4, Point4, Point4> vertex1, Tuple<Point4, Point4, Point4> vertex2)
         {
             //Item1 - projected coordinates, Item2 - normal vector, Item3 - global coordinates
@@ -321,7 +262,7 @@ namespace CG_Project_5
 
             if (v1.Item1.Z == v2.Item1.Z) u = t;
             else u = ((1d / pt.Z) - (1d / v1.Item1.Z)) / ((1d / v2.Item1.Z) - (1d / v1.Item1.Z));
-
+             
             Point4 pG = new Point4(u * (v2.Item3.X - v1.Item3.X) + v1.Item3.X, u * (v2.Item3.Y - v1.Item3.Y) + v1.Item3.Y,
                                    u * (v2.Item3.Z - v1.Item3.Z) + v1.Item3.Z, 1); // u * (v2.Item3.W - v1.Item3.W) + v1.Item3.W);
 
@@ -342,6 +283,11 @@ namespace CG_Project_5
             Vector3 n = new Vector3((float)triPoint.Item2.X, (float)triPoint.Item2.Y, (float)triPoint.Item2.Z);
             Vector3 camera = new Vector3(cPosX, cPosY, cPosZ);
 
+            Vector3 Ia = new Vector3(1, 1, 1);
+            Vector3 ka = new Vector3(0.5f, 0.5f, 0.5f);
+            Vector3 ks = new Vector3(0.75f, 0.75f, 0.75f);
+            Vector3 kd = new Vector3(0.25f, 0.25f, 0.25f);
+
             Vector3 v = Vector3.Divide(Vector3.Subtract(camera, p), Vector3.Subtract(camera, p).Length());
             Vector3 li = Vector3.Divide(Vector3.Subtract(Light, p), Vector3.Subtract(Light, p).Length());
             Vector3 ri = Vector3.Subtract(Vector3.Multiply(2 * (Vector3.Dot(n, li)), n), li);
@@ -350,11 +296,7 @@ namespace CG_Project_5
             I.X += (float)(kd.X * Ia.X * Math.Max(Vector3.Dot(n, li), 0) + ks.X * Ia.X * Math.Pow(Math.Max(Vector3.Dot(v, ri), 0), 1));
             I.Y += (float)(kd.Y * Ia.Y * Math.Max(Vector3.Dot(n, li), 0) + ks.Y * Ia.Y * Math.Pow(Math.Max(Vector3.Dot(v, ri), 0), 1));
             I.Z += (float)(kd.Z * Ia.Z * Math.Max(Vector3.Dot(n, li), 0) + ks.Z * Ia.Z * Math.Pow(Math.Max(Vector3.Dot(v, ri), 0), 1));
-            //double fatt = 1.0 / Math.Sqrt(Math.Pow(p.X + Light.X, 2) + Math.Pow(p.Y + Light.Y, 2) + Math.Pow(p.Z + Light.Z, 2));
-            //I.X += (float)(kd.X * 600 * fatt * Math.Max(Vector3.Dot(n, li), 0) + fatt * ks.X * 600 * Math.Pow(Math.Max(Vector3.Dot(v, ri), 0), 5));
-            //I.Y += (float)(kd.Y * 600 * fatt * Math.Max(Vector3.Dot(n, li), 0) + fatt * ks.Y * 600 * Math.Pow(Math.Max(Vector3.Dot(v, ri), 0), 5));
-            //I.Z += (float)(kd.Z * 600 * fatt * Math.Max(Vector3.Dot(n, li), 0) + fatt * ks.Z * 600 * Math.Pow(Math.Max(Vector3.Dot(v, ri), 0), 5));
-
+            
             Color result = new Color();
             result.A = startColor.A;
             result.R = (byte)Clamp(startColor.R * I.X);
@@ -371,13 +313,13 @@ namespace CG_Project_5
         }
 
 
-        // ---------------  Cylinder --------------------
+        // ---------------  CYLINDER --------------------
         public void DrawCylinder(List<Tuple<Point4, Point4, Point4>> vertices2D, int N)
         {
             //vertices2D: Item1 - projected coordinates, Item2 - normal vector, Item3 - global coordinates
             for (int i = 0; i <= N - 2; i++)
             {
-                if (BackFace(vertices2D[0].Item1, vertices2D[i + 2].Item1, vertices2D[i + 1].Item1))
+                if (Drawing.BackFace(vertices2D[0].Item1, vertices2D[i + 2].Item1, vertices2D[i + 1].Item1))
                 {
                     Tuple<Point4, Point4, Point4>[] F1 = { vertices2D[0], vertices2D[i + 2], vertices2D[i + 1] };
                     FillTriangle(F1.ToList(), fillColor);
@@ -386,7 +328,7 @@ namespace CG_Project_5
                     lineDDA_3D(drawPoints, vertices2D[0], vertices2D[i + 1], lineColor);
                 }
             }
-            if (BackFace(vertices2D[0].Item1, vertices2D[1].Item1, vertices2D[N].Item1))
+            if (Drawing.BackFace(vertices2D[0].Item1, vertices2D[1].Item1, vertices2D[N].Item1))
             {
                 Tuple<Point4, Point4, Point4>[] F11 = { vertices2D[0], vertices2D[1], vertices2D[N] };
                 FillTriangle(F11.ToList(), fillColor);
@@ -397,7 +339,7 @@ namespace CG_Project_5
 
             for (int i = N; i <= 2 * N - 2; i++)
             {
-                if (BackFace(vertices2D[i + 1].Item1, vertices2D[i + 2].Item1, vertices2D[i + 1 + N].Item1))
+                if (Drawing.BackFace(vertices2D[i + 1].Item1, vertices2D[i + 2].Item1, vertices2D[i + 1 + N].Item1))
                 {
                     Tuple<Point4, Point4, Point4>[] F2 = { vertices2D[i + 1], vertices2D[i + 2], vertices2D[i + 1 + N] };
                     FillTriangle(F2.ToList(), fillColor);
@@ -406,7 +348,7 @@ namespace CG_Project_5
                     lineDDA_3D(drawPoints, vertices2D[i + 2], vertices2D[i + 1 + N], lineColor);
                 }
             }
-            if (BackFace(vertices2D[2 * N].Item1, vertices2D[N + 1].Item1, vertices2D[3 * N].Item1))
+            if (Drawing.BackFace(vertices2D[2 * N].Item1, vertices2D[N + 1].Item1, vertices2D[3 * N].Item1))
             {
                 Tuple<Point4, Point4, Point4>[] F22 = { vertices2D[2 * N], vertices2D[N + 1], vertices2D[3 * N] };
                 FillTriangle(F22.ToList(), fillColor);
@@ -417,7 +359,7 @@ namespace CG_Project_5
 
             for (int i = 2 * N; i <= 3 * N - 2; i++)
             {
-                if (BackFace(vertices2D[i + 1].Item1, vertices2D[i + 2 - N].Item1, vertices2D[i + 2].Item1))
+                if (Drawing.BackFace(vertices2D[i + 1].Item1, vertices2D[i + 2 - N].Item1, vertices2D[i + 2].Item1))
                 {
                     Tuple<Point4, Point4, Point4>[] F3 = { vertices2D[i + 1], vertices2D[i + 2 - N], vertices2D[i + 2] };
                     FillTriangle(F3.ToList(), fillColor);
@@ -426,7 +368,7 @@ namespace CG_Project_5
                     lineDDA_3D(drawPoints, vertices2D[i + 2], vertices2D[i + 2 - N], lineColor);
                 }
             }
-            if (BackFace(vertices2D[2 * N + 1].Item1, vertices2D[3 * N].Item1, vertices2D[N + 1].Item1))
+            if (Drawing.BackFace(vertices2D[2 * N + 1].Item1, vertices2D[3 * N].Item1, vertices2D[N + 1].Item1))
             {
                 Tuple<Point4, Point4, Point4>[] F33 = { vertices2D[2 * N + 1], vertices2D[3 * N], vertices2D[N + 1] };
                 FillTriangle(F33.ToList(), fillColor);
@@ -437,7 +379,7 @@ namespace CG_Project_5
 
             for (int i = 3 * N; i <= 4 * N - 2; i++)
             {
-                if (BackFace(vertices2D[4 * N + 1].Item1, vertices2D[i + 1].Item1, vertices2D[i + 2].Item1))
+                if (Drawing.BackFace(vertices2D[4 * N + 1].Item1, vertices2D[i + 1].Item1, vertices2D[i + 2].Item1))
                 {
                     Tuple<Point4, Point4, Point4>[] F4 = { vertices2D[4 * N + 1], vertices2D[i + 1], vertices2D[i + 2] };
                     FillTriangle(F4.ToList(), fillColor);
@@ -446,7 +388,7 @@ namespace CG_Project_5
                     lineDDA_3D(drawPoints, vertices2D[i + 2], vertices2D[i + 1], lineColor);
                 }
             }
-            if (BackFace(vertices2D[4 * N + 1].Item1, vertices2D[4 * N].Item1, vertices2D[3 * N + 1].Item1))
+            if (Drawing.BackFace(vertices2D[4 * N + 1].Item1, vertices2D[4 * N].Item1, vertices2D[3 * N + 1].Item1))
             {
                 Tuple<Point4, Point4, Point4>[] F44 = { vertices2D[4 * N + 1], vertices2D[4 * N], vertices2D[3 * N + 1] };
                 FillTriangle(F44.ToList(), fillColor);
@@ -455,23 +397,12 @@ namespace CG_Project_5
                 lineDDA_3D(drawPoints, vertices2D[4 * N], vertices2D[3 * N + 1], lineColor);
             }
 
-            Algorithms.DrawPixels(bitmap, drawPoints);
+            Drawing.DrawPixels(bitmap, drawPoints);
             drawPoints.Clear();
         }
 
-        public bool BackFace(Point4 p1, Point4 p2, Point4 p3)
-        {
-            Vector3 v1 = new Vector3((float)(p2.X - p1.X), (float)(p2.Y - p1.Y), 0);
-            Vector3 v2 = new Vector3((float)(p3.X - p1.X), (float)(p3.Y - p1.Y), 0);
-            Vector3 result = Vector3.Cross(v1, v2);
-            if (result.Z > 0)
-                return true;
-            else
-                return false;
-        }
 
-
-        // ---------------- Sliders --------------------
+        // ---------------- SLIDERS --------------------
         // Cylinder
         private void Nslider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -480,8 +411,6 @@ namespace CG_Project_5
                 cylinder.N = (int)Nslider.Value;
                 bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
                 Scene.Source = bitmap;
-                //cylinder.MyScene = bitmap;
-                //Scene.Children.Clear();
                 cylinder.ClearVertices();
                 cylinder.CreateCylinder();
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
@@ -494,7 +423,6 @@ namespace CG_Project_5
                 cylinder.Height = (int)HeightSlider.Value;
                 bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
                 Scene.Source = bitmap;
-                //cylinder.MyScene = bitmap;
                 cylinder.ClearVertices();
                 cylinder.CreateCylinder();
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
@@ -507,9 +435,6 @@ namespace CG_Project_5
                 cylinder.Radius = (int)RadiusSlider.Value;
                 bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
                 Scene.Source = bitmap;
-                //cylinder.MyScene = bitmap;
-
-                //Scene.Children.Clear();
                 cylinder.ClearVertices();
                 cylinder.CreateCylinder();
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
@@ -519,25 +444,21 @@ namespace CG_Project_5
         //Rotation
         private void AngleXSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            angleX = AngleXSlider.Value;
-            bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
-            Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
+                angleX = AngleXSlider.Value;
+                bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
+                Scene.Source = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
         private void AngleYSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            angleY = AngleYSlider.Value;
-            bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
-            Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
+                angleY = AngleYSlider.Value;
+                bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
+                Scene.Source = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -548,8 +469,6 @@ namespace CG_Project_5
                 angleZ = AngleZSlider.Value;
                 bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
                 Scene.Source = bitmap;
-                //cylinder.MyScene = bitmap;
-                //Scene.Children.Clear();
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -560,10 +479,8 @@ namespace CG_Project_5
             sx = (int)SxSlider.Value;
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -573,10 +490,8 @@ namespace CG_Project_5
             sy = (int)SySlider.Value;
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -587,10 +502,8 @@ namespace CG_Project_5
             cPosX = (int)CamXslider.Value;
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -600,10 +513,8 @@ namespace CG_Project_5
             cPosY = (int)CamYslider.Value;
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -613,10 +524,8 @@ namespace CG_Project_5
             cPosZ = (int)CamZslider.Value;
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -624,14 +533,12 @@ namespace CG_Project_5
         // Light
         private void LightXslider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            lightX = LightXslider.Value;
+            lightX = -LightXslider.Value;
             Light = new Vector3((float)lightX, (float)lightY, (float)lightZ);
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -642,10 +549,8 @@ namespace CG_Project_5
             Light = new Vector3((float)lightX, (float)lightY, (float)lightZ);
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }
@@ -656,10 +561,8 @@ namespace CG_Project_5
             Light = new Vector3((float)lightX, (float)lightY, (float)lightZ);
             bitmap = new WriteableBitmap((int)Scene.Width, (int)Scene.Height, 96, 96, PixelFormats.Bgra32, BitmapPalettes.Halftone256);
             Scene.Source = bitmap;
-            //Scene.Children.Clear();
             if (cylinder != null)
             {
-                //cylinder.MyScene = bitmap;
                 DrawCylinder(translate3Dto2D(cylinder.Vertices), cylinder.N);
             }
         }

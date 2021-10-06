@@ -11,6 +11,7 @@ using System.Windows;
 
 namespace CG_Project_5
 {
+    //Only for Canvas!
     public class Diamond
     {
         public List<Point4> vertices = new List<Point4>();

@@ -1,6 +1,6 @@
 # Computer-Graphics-Projects
 Repository for all projects from Computer Graphics Course.\
-Each application is implemented using WPF technology.
+Each application is implemented using WPF.
 
 - Project 1 - Image Filtering (using single pixel operations)
 - Project 2 - Project 1 application extended by Dithering and Color Quantization
